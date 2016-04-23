@@ -3,6 +3,13 @@
 
 #include "stdafx.h"
 
+REAL calculoDesvioRealRelativo(REAL u_n, REAL semiMinorAxis, REAL epsilon)
+{
+	REAL q = semiMinorAxis * (1 - epsilon);
+	REAL DRR = (u_n / q) - 1;
+	return DRR;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	REAL np = 92115;
@@ -48,15 +55,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	REAL u_n = u_0;
 	REAL v_n = v_0;
 	REAL k_mu_sams = (k * mu * pow(specificAngularMomentumSquared, -1));
-	for (long n = 0; n < STEP_COUNT; n++)
+	for (long n = 0; n < STEP_COUNT; n++) //n++ deberia incrementarse en orden n * 10
 	{
+		auto startTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
+
 		REAL theta_n = n * k;
 		REAL radius_n = 1 / u_n;
-		output << theta_n << ";" << radius_n << ";" << "\n";
+		output << theta_n << ";" << radius_n << ";";
 		REAL u_n_1 = u_n + (k * v_n);
 		REAL v_n_1 = v_n - (k * u_n) + k_mu_sams;
+		REAL desvioRealRelativo = calculoDesvioRealRelativo(u_n, semiMinorAxis, epsilon);
 		u_n = u_n_1;
 		v_n = v_n_1;
+
+		auto finishTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
+		auto tiempoDeCorrida = std::chrono::duration_cast<std::chrono::nanoseconds>(finishTimer - startTimer).count();
+		
+		output << desvioRealRelativo << ";" << tiempoDeCorrida << ";" << "\n";
 	}
 
 	output.close();
@@ -65,6 +80,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	return 0;
 }
 
+/*
+Metodo para calcular tiempo de corrida en milisegundos si es necesario
+#include <time.h>
+clock_t start;
+clock_t end;
+double msecs;
+start = clock();
+end = clock();
+msecs = ((double)(end - start)) * 1000 / CLOCKS_PER_SEC;
+printf("Timer=%e\n", msecs);
+*/
 
 void algoritmo2()
 {
@@ -141,12 +167,4 @@ void algoritmo2()
 	printf("Done!\n", epsilon);
 	getchar();
 	return;
-}
-
-
-REAL calculoDesvioRealRelativo(REAL u_n, REAL semiMinorAxis, REAL epsilon)
-{
-	REAL q = semiMinorAxis * (1 - epsilon);
-	REAL DRR = (u_n / q) - 1;
-	return DRR;
 }

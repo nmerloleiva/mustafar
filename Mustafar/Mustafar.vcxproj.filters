@@ -32,8 +32,5 @@
     <ClCompile Include="Mustafar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Algoritmo2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
