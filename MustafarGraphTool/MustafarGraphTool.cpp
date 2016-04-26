@@ -3,18 +3,24 @@
 
 using namespace std;
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
-	CD2D1Graph graph(800, 800);
-	graph.BeginDraw();
-	
+	if (argc < 2)
+	{
+		printf("No database file specified!\n");
+		return -1;
+	}
+
 	std::fstream input;
-	input.open("..\\Mustafar\\Mustafar.csv", std::ios_base::in);
+	input.open(argv[1], std::ios_base::in);
 	if (input.fail())
 	{
 		printf("Error opening file!\n");
 		return -1;
 	}
+
+	CD2D1Graph graph(800, 800);
+	graph.BeginDraw();
 
 	float scale = 200000000;
 	while (!input.eof())

@@ -18,7 +18,6 @@ typedef double REAL;
 typedef float REAL;
 #endif
 
-#define STEP_COUNT 10e+1
 #define LAMBDA_DEN 9e+4 // 9e+5 gives epsilon out of range 
 
 #define _USE_MATH_DEFINES
@@ -27,3 +26,4 @@ typedef float REAL;
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
