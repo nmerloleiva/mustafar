@@ -5,6 +5,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+	CoInitialize(NULL);
+
 	if (argc < 2)
 	{
 		printf("No database file specified!\n");
@@ -51,7 +53,14 @@ int main(int argc, char* argv[])
 
 	graph.EndDraw();
 	graph.Present();
+
+	std::wstring pngFileName = _bstr_t(argv[1]);
+	pngFileName.append(L".png");
+	graph.SavePNG(pngFileName.c_str());
+
 	printf("Done!\n");
+
+	input.close();
 
 	return 0;
 }

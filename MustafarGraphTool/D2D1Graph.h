@@ -4,10 +4,13 @@
 #include <comdef.h>
 #include <d3d11_1.h>
 #include <d2d1_1.h>
+#include <wincodec.h>
 #include <math.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "windowscodecs.lib")
 
 #define SMART_PTR_DEF(x) _COM_SMARTPTR_TYPEDEF(x,__uuidof(x));
 #define RETURN_ON_FAIL(x) { if (FAILED(x)) return x; }
@@ -21,6 +24,13 @@ SMART_PTR_DEF(IDXGISurface)
 SMART_PTR_DEF(ID2D1SolidColorBrush)
 SMART_PTR_DEF(ID3D10Multithread)
 SMART_PTR_DEF(ID2D1Factory)
+SMART_PTR_DEF(ID3D11Resource)
+SMART_PTR_DEF(IWICImagingFactory)
+SMART_PTR_DEF(IWICBitmapEncoder)
+SMART_PTR_DEF(IWICBitmapFrameEncode)
+SMART_PTR_DEF(IWICStream)
+SMART_PTR_DEF(IPropertyBag2)
+SMART_PTR_DEF(ID3D11Query)
 
 class CD2D1Graph
 {
@@ -47,6 +57,7 @@ public:
 	
 	HANDLE GetInitSyncEventHandle() { return m_InitSyncEventHandle; }
 
+	HRESULT SavePNG(const wchar_t* fileName);
 private:
 
 	static LRESULT CALLBACK WindowProc(

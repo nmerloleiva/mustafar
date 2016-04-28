@@ -14,6 +14,8 @@ LRESULT CALLBACK CD2D1Graph::WindowProc(
 DWORD WINAPI CD2D1Graph::ThreadProc(
 	_In_ LPVOID lpParameter)
 {
+	CoInitialize(NULL);
+
 	CD2D1Graph* graph = (CD2D1Graph*)lpParameter;
 	graph->Initialize();
 	SetEvent(graph->GetInitSyncEventHandle());
@@ -38,6 +40,7 @@ CD2D1Graph::CD2D1Graph(FLOAT width, FLOAT height)
 
 CD2D1Graph::~CD2D1Graph()
 {
+	PostMessage(GetWindowHandle(), WM_CLOSE, 0, 0);
 	WaitForSingleObject(m_WindowThreadHandle, INFINITE);
 }
 
@@ -54,7 +57,7 @@ HRESULT CD2D1Graph::Initialize()
 
 	m_WindowHandle = CreateWindowEx(WS_EX_COMPOSITED, L"MustafarWindow", L"Mustafar", 0, 0, 0, m_Width, m_Height, NULL, NULL, 0, this);
 	
-	ShowWindow(m_WindowHandle, 1);
+	//ShowWindow(m_WindowHandle, 1);
 
 	D3D_FEATURE_LEVEL featureLevelRequest[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
 	UINT featureLevelRequestCount = sizeof(featureLevelRequest) / sizeof(featureLevelRequest[0]);
@@ -118,7 +121,7 @@ HRESULT CD2D1Graph::Initialize()
 
 	m_pD2D1DeviceContext->BeginDraw();
 
-	m_pD2D1DeviceContext->Clear(D2D1::ColorF(1, 1, 1, 1));
+	m_pD2D1DeviceContext->Clear(D2D1::ColorF(0, 0, 0, 0)); // Transparent background
 	RETURN_ON_FAIL(hr);
 	
 	m_pD2D1DeviceContext->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
@@ -161,10 +164,86 @@ HRESULT CD2D1Graph::DrawPoint(FLOAT x, FLOAT y)
 
 HRESULT CD2D1Graph::EndDraw()
 {
-	return  m_pD2D1DeviceContext->EndDraw();;
+	return m_pD2D1DeviceContext->EndDraw();;
 }
 
 HRESULT CD2D1Graph::Present()
 {
 	return m_pSwapChain->Present(0, 0);;
+}
+
+HRESULT CD2D1Graph::SavePNG(const wchar_t* fileName)
+{
+	HRESULT hr = S_OK;
+
+	ID3D11Texture2DPtr backBuffer = nullptr;
+	hr = m_pSwapChain->GetBuffer(0, __uuidof(backBuffer), (void**)&backBuffer);
+	RETURN_ON_FAIL(hr);
+
+	ID3D11Texture2DPtr stagingTexture = nullptr;
+	D3D11_TEXTURE2D_DESC textureDesc = { 0 };
+	backBuffer->GetDesc(&textureDesc);
+	textureDesc.Usage = D3D11_USAGE_STAGING;
+	textureDesc.BindFlags = 0;
+	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	hr = m_pD3D11Device->CreateTexture2D(&textureDesc, nullptr, &stagingTexture);
+	RETURN_ON_FAIL(hr);
+
+	m_pD3D11DeviceContext->CopyResource(stagingTexture, backBuffer);
+
+	IWICImagingFactoryPtr pFactory = nullptr;
+	hr = CoCreateInstance(
+		CLSID_WICImagingFactory,
+		NULL,
+		CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(&pFactory));
+
+	IWICBitmapEncoderPtr pEncoder = nullptr;
+	hr = pFactory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &pEncoder);
+	RETURN_ON_FAIL(hr);
+
+	IWICStreamPtr pWICStream = nullptr;
+	hr = pFactory->CreateStream(&pWICStream);
+	RETURN_ON_FAIL(hr);
+
+	hr = pWICStream->InitializeFromFilename(fileName, GENERIC_WRITE);
+	RETURN_ON_FAIL(hr);
+
+	hr = pEncoder->Initialize(pWICStream, WICBitmapEncoderNoCache);
+	RETURN_ON_FAIL(hr);
+
+	IWICBitmapFrameEncodePtr pBitmapFrameEncode = nullptr;
+	hr = pEncoder->CreateNewFrame(&pBitmapFrameEncode, nullptr);
+	RETURN_ON_FAIL(hr);
+
+	hr = pBitmapFrameEncode->Initialize(nullptr);
+	RETURN_ON_FAIL(hr);
+
+	hr = pBitmapFrameEncode->SetSize(m_Width, m_Height);
+	RETURN_ON_FAIL(hr);
+
+	GUID pixelFormat = GUID_WICPixelFormat32bppBGRA;
+	hr = pBitmapFrameEncode->SetPixelFormat(&pixelFormat);
+	RETURN_ON_FAIL(hr);
+
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	hr = m_pD3D11DeviceContext->Map(stagingTexture, 0, D3D11_MAP_READ, 0, &mapped);
+	RETURN_ON_FAIL(hr);
+
+	BYTE* pBuffer = (BYTE*)mapped.pData;
+	UINT bufferSize = m_Height * mapped.RowPitch;
+
+	hr = pBitmapFrameEncode->WritePixels(m_Height, mapped.RowPitch, bufferSize, pBuffer);
+	RETURN_ON_FAIL(hr);
+
+	hr = pBitmapFrameEncode->Commit();
+	RETURN_ON_FAIL(hr);
+
+	hr = pEncoder->Commit();
+	RETURN_ON_FAIL(hr);
+
+	m_pD3D11DeviceContext->Unmap(stagingTexture, 0);
+
+	return S_OK;
 }
