@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <tchar.h>
 
+#define CREATE_DB 1
+
 #define DOUBLE_PRECISION 0
 #if DOUBLE_PRECISION
 typedef double REAL;
