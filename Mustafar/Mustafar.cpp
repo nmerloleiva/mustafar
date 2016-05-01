@@ -3,28 +3,31 @@
 
 #include "stdafx.h"
 
-REAL computeDDR(REAL u_n, REAL semiMinorAxis, REAL epsilon)
+template<typename T>
+T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 {
-	REAL q = semiMinorAxis * (1 - epsilon);
-	REAL DRR = (pow(u_n, -1) / q) - 1;
+	T q = semiMinorAxis * (1 - epsilon);
+	T DRR = (pow(u_n, -1) / q) - 1;
 	return DRR;
 }
 
-REAL algorithm1(REAL u_0, REAL v_0, REAL k, REAL alpha, double steps, std::fstream* output = nullptr)
+template<typename T>
+T algorithm1(T u_0, T v_0, T k, T alpha, double steps, std::fstream* output = nullptr)
 {
-	REAL u_n = u_0;
-	REAL v_n = v_0;
-	REAL k_alpha = k * alpha;
+	T u_n = u_0;
+	T v_n = v_0;
+	T k_alpha = k * alpha;
 	for (double n = 0; n < steps; n++)
 	{
-#if CREATE_DB
-		REAL theta_n = n * k;
-		REAL radius_n = 1 / u_n;
-		*output << theta_n << ";" << radius_n << ";" << "\n";
-#endif
+		if (output)
+		{
+			REAL theta_n = n * k;
+			REAL radius_n = 1 / u_n;
+			*output << theta_n << ";" << radius_n << ";" << "\n";
+		}
 
-		REAL u_n_1 = u_n + (k * v_n);
-		REAL v_n_1 = v_n - (k * u_n) + k_alpha;
+		T u_n_1 = u_n + (k * v_n);
+		T v_n_1 = v_n - (k * u_n) + k_alpha;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
@@ -32,29 +35,32 @@ REAL algorithm1(REAL u_0, REAL v_0, REAL k, REAL alpha, double steps, std::fstre
 	return u_n;
 }
 
-REAL algorithm2(REAL u_0, REAL v_0, REAL k, REAL alpha, double steps, std::fstream* output = nullptr)
+template<typename T>
+T algorithm2(T u_0, T v_0, T k, T alpha, double steps, std::fstream* output = nullptr)
 {
-	REAL u_n = u_0;
-	REAL v_n = v_0;
+	T u_n = u_0;
+	T v_n = v_0;
 	for (double n = 0; n < steps; n++)
 	{
-#if CREATE_DB
-		REAL theta_n = n * k;
-		REAL radius_n = 1 / u_n;
-		*output << theta_n << ";" << radius_n << ";" << "\n";
-#endif
-		REAL w_1 = u_n + (k * (v_n / 2));
-		REAL z_1 = v_n + (k * ((alpha - u_n) / 2));
-		REAL w_2 = u_n + (k * (z_1 / 2));
-		REAL z_2 = v_n + (k * ((alpha - w_1) / 2));
-		REAL w_3 = u_n + (k * z_2);
-		REAL z_3 = v_n + (k * (alpha - w_2));
+		if (output)
+		{
+			REAL theta_n = n * k;
+			REAL radius_n = 1 / u_n;
+			*output << theta_n << ";" << radius_n << ";" << "\n";
+		}
 
-		REAL k_v_z = (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3) / 6));
-		REAL k_v_alfa_u_w = (k * (v_n + ((6 * alpha) - (u_n)-(2 * w_1) - (2 * w_2) - (w_3)) / 6));
+		T w_1 = u_n + (k * (v_n / 2));
+		T z_1 = v_n + (k * ((alpha - u_n) / 2));
+		T w_2 = u_n + (k * (z_1 / 2));
+		T z_2 = v_n + (k * ((alpha - w_1) / 2));
+		T w_3 = u_n + (k * z_2);
+		T z_3 = v_n + (k * (alpha - w_2));
 
-		REAL u_n_1 = u_n + k_v_z;
-		REAL v_n_1 = v_n + k_v_alfa_u_w;
+		T k_v_z = (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3) / 6));
+		T k_v_alfa_u_w = (k * (v_n + ((6 * alpha) - (u_n)-(2 * w_1) - (2 * w_2) - (w_3)) / 6));
+
+		T u_n_1 = u_n + k_v_z;
+		T v_n_1 = v_n + k_v_alfa_u_w;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
@@ -66,6 +72,8 @@ int main(int argc, char* argv[])
 {
 	double steps = 0;
 	long alg = 0;
+	long dp = 0;
+	long print = 0;
 	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
 		if (!strcmp(argv[argIndex], "-alg") &&
@@ -80,6 +88,18 @@ int main(int argc, char* argv[])
 			steps = atof(argv[argIndex + 1]);
 			argIndex++;
 		}
+		else if (!strcmp(argv[argIndex], "-dp") &&
+			(argIndex + 1) < argc)
+		{
+			dp = atol(argv[argIndex + 1]);
+			argIndex++;
+		}
+		else if (!strcmp(argv[argIndex], "-print") &&
+			(argIndex + 1) < argc)
+		{
+			print = atol(argv[argIndex + 1]);
+			argIndex++;
+		}
 	}
 	
 	if (steps == 0 ||
@@ -89,18 +109,23 @@ int main(int argc, char* argv[])
 		printf("Wrong params!\n");
 		printf("-alg \t Algorithm number {1, 2}.\n");
 		printf("-steps \t Algorithm step count.\n");
+		printf("-dp \t Use double precision. {0, 1}\n");
+		printf("-print \t Print results. {0, 1}\n");
 		return 0;
 	}
 
 	char runDatabaseFileName[255];
 	memset(runDatabaseFileName, 0, sizeof(runDatabaseFileName) / sizeof(runDatabaseFileName[0]));
-	sprintf_s(runDatabaseFileName, "alg_%ld_steps_%.0f_db.csv", alg, steps);
+	sprintf_s(runDatabaseFileName, "alg_%ld_steps_%.0f_dp_%ld_db.csv", alg, steps, dp);
 
 	printf("Creating output files...\n");
-#if CREATE_DB
+
 	std::fstream dbOutput;
-	dbOutput.open(runDatabaseFileName, std::ios_base::out);
-#endif
+	if (print)
+	{
+		dbOutput.open(runDatabaseFileName, std::ios_base::out);
+	}
+
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_stats.csv", std::ios_base::app);
 
@@ -119,41 +144,30 @@ int main(int argc, char* argv[])
 	REAL semiMinorAxis = pow(lambda, 2) * (5.791e+10); // m
 	REAL mu = G * M; // m^3 / s^2
 	REAL specificAngularMomentumSquared = semiMinorAxis * mu * (1 - pow(epsilon, 2)); // m^4 / s^2
-	
-	printf("ALGORITHM=%d\n", alg);
-	statsOutput << alg << ";";
-	printf("DOUBLE PRECISION=%d\n", DOUBLE_PRECISION);
-	statsOutput << DOUBLE_PRECISION << ";";
-	printf("NP=%e\n", np);
-	//statsOutput << np << ";";
-	printf("LAMBDA=%e\n", lambda);
-	//statsOutput << lambda << ";";
-	printf("M1=%e\n", m1);
-	//statsOutput << m1 << ";";
-	printf("M2=%e\n", m2);
-	//statsOutput << m2 << ";";
-	printf("MU=%e\n", mu);
-	//statsOutput << mu << ";";
-	printf("EPSILON=%e\n", epsilon);
-	//statsOutput << epsilon << ";";
-	printf("SEMI MINOR AXIS=%e\n", semiMinorAxis);
-	//statsOutput << semiMinorAxis << ";";
-	printf("SPECIFIC ANGULAR MOMENTUM SQUARED=%e\n", specificAngularMomentumSquared);
-	//statsOutput << specificAngularMomentumSquared << ";";
-
 	REAL u_0 = pow(semiMinorAxis * (1 - epsilon), -1);
 	REAL v_0 = 0;
 	REAL k = (2 * M_PI) / steps;
 
+	printf("ALGORITHM=%d\n", alg);
+	printf("DOUBLE PRECISION=%d\n", dp);
+	printf("NP=%e\n", np);
+	printf("LAMBDA=%e\n", lambda);
+	printf("M1=%e\n", m1);
+	printf("M2=%e\n", m2);
+	printf("MU=%e\n", mu);
+	printf("EPSILON=%e\n", epsilon);
+	printf("SEMI MINOR AXIS=%e\n", semiMinorAxis);
+	printf("SPECIFIC ANGULAR MOMENTUM SQUARED=%e\n", specificAngularMomentumSquared);
 	printf("U_0=%e\n", u_0);
-	//statsOutput << u_0 << ";";
 	printf("V_0=%e\n", v_0);
-	//statsOutput << v_0 << ";";
 	printf("STEP COUNT=%e\n", steps);
-	statsOutput << steps << ";";
 	printf("RADIAN STEP=%e\n", k);
+
+	statsOutput << alg << ";";
+	statsOutput << dp << ";";
+	statsOutput << steps << ";";
 	statsOutput << (double)k << ";";
-	
+
 	REAL alpha = mu * (pow(specificAngularMomentumSquared, -1));
 	REAL u_n = 0;
 
@@ -161,35 +175,43 @@ int main(int argc, char* argv[])
 	auto startTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
 	if (alg == 1)
 	{
-#if CREATE_DB
-		u_n = algorithm1(u_0, v_0, k, alpha, steps, &dbOutput);
-#else
-		u_n = algorithm1(u_0, v_0, k, alpha, steps);
-#endif
+		if (dp)
+		{
+			u_n = algorithm1<double>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+		}
+		else
+		{
+			u_n = algorithm1<float>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+		}
 	}
 	else if (alg == 2)
 	{
-#if CREATE_DB
-		u_n = algorithm2(u_0, v_0, k, alpha, steps, &dbOutput);
-#else
-		u_n = algorithm2(u_0, v_0, k, alpha, steps);
-#endif
+		if (dp)
+		{
+			u_n = algorithm2<double>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+		}
+		else
+		{
+			u_n = algorithm2<float>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+		}
 	}
 	auto finishTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
 	auto tiempoDeCorrida = std::chrono::duration_cast<std::chrono::nanoseconds>(finishTimer - startTimer).count();
 	printf("End!\n");
 
-#if CREATE_DB
-	printf("Saving database...\n");
-	dbOutput.close();
-#endif
 	REAL ddr = computeDDR(u_n, semiMinorAxis, epsilon);
 	printf("DDR=%e\n", ddr);
 
 	printf("Saving stats...\n");
 	statsOutput << (double)ddr << ";" << (double)tiempoDeCorrida << ";" << "\n";
 	statsOutput.close();
-	
+
+	if (print)
+	{
+		printf("Saving database...\n");
+		dbOutput.close();
+	}
+
 	printf("Done!\n");
 	return 0;
 }

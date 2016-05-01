@@ -5,26 +5,62 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	CoInitialize(NULL);
-
-	if (argc < 2)
+	double scale = 0;
+	double width = 0;
+	double height = 0;
+	string filename;
+	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
-		printf("No database file specified!\n");
-		return -1;
+		if (!strcmp(argv[argIndex], "-csv") &&
+			(argIndex + 1) < argc)
+		{
+			filename = argv[argIndex + 1];
+			argIndex++;
+		}
+		else if (!strcmp(argv[argIndex], "-width") &&
+			(argIndex + 1) < argc)
+		{
+			width = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
+		else if (!strcmp(argv[argIndex], "-height") &&
+			(argIndex + 1) < argc)
+		{
+			height = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
+		else if (!strcmp(argv[argIndex], "-scale") &&
+			(argIndex + 1) < argc)
+		{
+			scale = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
+	}
+
+	if (scale == 0 ||
+		width == 0 ||
+		height == 0 ||
+		filename.length() == 0)
+	{
+		printf("Wrong params!\n");
+		printf("-csv \t Input database filename.\n");
+		printf("-scale \t Drawing scale.\n");
+		printf("-width \t Drawing width.\n");
+		printf("-height \t Drawing height.\n");	
+		return 0;
 	}
 
 	std::fstream input;
-	input.open(argv[1], std::ios_base::in);
+	input.open(filename, std::ios_base::in);
 	if (input.fail())
 	{
 		printf("Error opening file!\n");
 		return -1;
 	}
 
-	CD2D1Graph graph(800, 800);
+	CD2D1Graph graph(width, height);
 	graph.BeginDraw();
 
-	float scale = 200000000;
 	while (!input.eof())
 	{
 		string line;
@@ -54,7 +90,7 @@ int main(int argc, char* argv[])
 	graph.EndDraw();
 	graph.Present();
 
-	std::wstring pngFileName = _bstr_t(argv[1]);
+	std::wstring pngFileName = _bstr_t(filename.c_str());
 	pngFileName.append(L".png");
 	graph.SavePNG(pngFileName.c_str());
 

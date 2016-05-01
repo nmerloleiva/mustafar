@@ -31,6 +31,7 @@ DWORD WINAPI CD2D1Graph::ThreadProc(
 
 CD2D1Graph::CD2D1Graph(FLOAT width, FLOAT height)
 {
+	CoInitialize(NULL);
 	m_Width = width;
 	m_Height = height;
 	m_InitSyncEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
