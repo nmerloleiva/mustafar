@@ -12,9 +12,10 @@ T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 }
 
 template<typename T>
-T disturbeSteps(&T steps)
+T disturbeSteps(T steps)
 {
-	T steps = steps + experimentalDisturbance;
+	T steps = steps + experimentalDisturbance; //Toma la referencia? De cualquier manera esa es la idea
+											  // Cambiar por la referencia sino (intente con &)
 }
 
 template<typename T>
@@ -22,8 +23,16 @@ T computeCp(T originalResult, T disturbedResult)
 {
 	T relativeError = (originalResult - disturbedResult) / originalResult;
 	T C_p = relativeError * (1 / experimentalDisturbance); //numero de condicion del problema
-
 	return C_p;
+}
+
+template<typename T>
+T computeStability(T resultInOnePrecision, T resultInAnotherPrecision)
+{
+	//Este proceso es conceptual, no esta correctamente implementado aun
+	totalMachineError = machineErrorInAnotherPrecision - machineErrorInOnePrecision;
+	stability = (resultInOnePrecision - resultInAnotherPrecision) / (resultInOnePrecision * totalMachineError);
+	return stability;
 }
 
 template<typename T>
