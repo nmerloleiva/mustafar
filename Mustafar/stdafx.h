@@ -20,6 +20,8 @@ typedef double REAL;
 typedef float REAL;
 #endif
 
+#define experimentalDisturbance 0.001 //cambiarla para varios calculos
+
 #define LAMBDA_DEN 9e+4 // 9e+5 gives epsilon out of range 
 
 #define _USE_MATH_DEFINES

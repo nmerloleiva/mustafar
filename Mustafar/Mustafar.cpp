@@ -12,6 +12,21 @@ T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 }
 
 template<typename T>
+T disturbeSteps(&T steps)
+{
+	T steps = steps + experimentalDisturbance;
+}
+
+template<typename T>
+T computeCp(T originalResult, T disturbedResult)
+{
+	T relativeError = (originalResult - disturbedResult) / originalResult;
+	T C_p = relativeError * (1 / experimentalDisturbance); //numero de condicion del problema
+
+	return C_p;
+}
+
+template<typename T>
 T algorithm1(T u_0, T v_0, T k, T alpha, double steps, std::fstream* output = nullptr)
 {
 	T u_n = u_0;
