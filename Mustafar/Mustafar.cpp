@@ -13,15 +13,24 @@ T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 }
 
 template<typename T>
-T disturbeSteps(T steps)
+T disturbeSteps(T m1,T m2,T M, T epsilon,T semiMinorAxis) //pasar parametros ByRef
 {
-	T steps = steps + experimentalDisturbance; //Toma la referencia? De cualquier manera esa es la idea
-											  // Cambiar por la referencia sino (intente con &)
+	m1 = lambda * (1.9891e+30) + experimentalDisturbance;; // kg
+	m2 = lambda * (3.301e+23) + experimentalDisturbance;; // kg
+	M = m1 + m2; // kg
+	semiMinorAxis = pow(lambda, 2) * (5.791e+10) + experimentalDisturbance; // m
+	epsilon = pow(lambda, -1) * 0.2056 + experimentalDisturbance; // -
+	if (epsilon <= 0 || epsilon >= 1)
+	{
+		printf("Epsilon=%e out of range!\n", epsilon);
+		return 0;
+	}
 }
 
 template<typename T>
-T computeCp(T originalResult, T disturbedResult)
+T computeCp(T disturbedResult)
 {
+	T originalResult = 10; //poner el resultado original aca
 	T relativeError = (originalResult - disturbedResult) / originalResult;
 	T C_p = relativeError * (1 / experimentalDisturbance); //numero de condicion del problema
 	return C_p;
@@ -30,10 +39,18 @@ T computeCp(T originalResult, T disturbedResult)
 template<typename T>
 T computeStability(T resultInOnePrecision, T resultInAnotherPrecision)
 {
-	//Este proceso es conceptual, no esta correctamente implementado aun
-	totalMachineError = machineErrorInAnotherPrecision - machineErrorInOnePrecision;
+	//utilizar la precision y los resultados de algun paso en dos precisiones diferentes y calcular
+	machineUnitErrorInAnotherPrecision = 8;
+	machineUnitErrorInOnePrecision = 16;
+	totalMachineError = machineUnitErrorInAnotherPrecision - machineUnitErrorInOnePrecision;
 	stability = (resultInOnePrecision - resultInAnotherPrecision) / (resultInOnePrecision * totalMachineError);
 	return stability;
+}
+
+template<typename T>
+T computeCa(T stability, T C_p)
+{
+	Ca = stability / C_p;
 }
 
 template<typename T>
