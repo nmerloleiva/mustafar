@@ -37,7 +37,7 @@ class CD2D1Graph
 
 public:
 
-	CD2D1Graph(FLOAT width, FLOAT height);
+	CD2D1Graph(FLOAT width, FLOAT height, FLOAT scale);
 
 	~CD2D1Graph();
 
@@ -82,6 +82,6 @@ private:
 	HANDLE m_InitSyncEventHandle;
 	FLOAT m_Width;
 	FLOAT m_Height;
-
+	FLOAT m_Scale;
 };
 

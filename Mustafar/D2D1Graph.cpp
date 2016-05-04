@@ -29,11 +29,12 @@ DWORD WINAPI CD2D1Graph::ThreadProc(
 	return 0;
 }
 
-CD2D1Graph::CD2D1Graph(FLOAT width, FLOAT height)
+CD2D1Graph::CD2D1Graph(FLOAT width, FLOAT height, FLOAT scale)
 {
 	CoInitialize(NULL);
 	m_Width = width;
 	m_Height = height;
+	m_Scale = scale;
 	m_InitSyncEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_WindowThreadHandle = CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
 	WaitForSingleObject(m_InitSyncEventHandle, INFINITE);
@@ -127,9 +128,14 @@ HRESULT CD2D1Graph::Initialize()
 	
 	m_pD2D1DeviceContext->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
-	m_pD2D1DeviceContext->DrawLine(D2D1::Point2F(m_Width / 2 - 5, m_Height / 2), D2D1::Point2F(m_Width / 2 + 5, m_Height / 2), m_pSolidBrush1);
-
-	m_pD2D1DeviceContext->DrawLine(D2D1::Point2F(m_Width / 2, m_Height / 2 - 5), D2D1::Point2F(m_Width / 2, m_Height / 2 + 5), m_pSolidBrush1);
+	D2D1_ELLIPSE ellipse;
+	ellipse.point.x = m_Width / 2;
+	ellipse.point.y = m_Height / 2;
+	ellipse.radiusX = 20;
+	ellipse.radiusY = 20;
+	m_pD2D1DeviceContext->DrawEllipse(ellipse, m_pSolidBrush1, 1.0);
+	m_pD2D1DeviceContext->DrawLine(D2D1::Point2F(0, ellipse.point.y), D2D1::Point2F(m_Width, ellipse.point.y), m_pSolidBrush1);
+	m_pD2D1DeviceContext->DrawLine(D2D1::Point2F(ellipse.point.x, 0), D2D1::Point2F(ellipse.point.x, m_Height), m_pSolidBrush1);
 
 	hr = m_pD2D1DeviceContext->EndDraw();
 	RETURN_ON_FAIL(hr);
@@ -143,7 +149,7 @@ HRESULT CD2D1Graph::Initialize()
 HRESULT CD2D1Graph::BeginDraw()
 {
 	m_pD2D1DeviceContext->BeginDraw();
-	m_pD2D1DeviceContext->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+	m_pD2D1DeviceContext->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
 	return S_OK;
 }
 
@@ -156,10 +162,13 @@ HRESULT CD2D1Graph::DrawPointPolar(FLOAT radius, FLOAT radians)
 
 HRESULT CD2D1Graph::DrawPoint(FLOAT x, FLOAT y)
 {
-	D2D1_RECT_F rect;
-	rect.left = rect.right = x + (m_Width / 2);
-	rect.top = rect.bottom = -y + (m_Height / 2);
-	m_pD2D1DeviceContext->DrawRectangle(rect, m_pSolidBrush2, 1.0);
+	D2D1_ELLIPSE ellipse;
+	ellipse.point.x = x / m_Scale + (m_Width / 2);
+	ellipse.point.y = y / m_Scale + (m_Height / 2);
+	ellipse.radiusX = 3;
+	ellipse.radiusY = 3;
+	m_pD2D1DeviceContext->DrawEllipse(ellipse, m_pSolidBrush2, 1.0);
+	m_pD2D1DeviceContext->FillEllipse(ellipse, m_pSolidBrush2);
 	return S_OK;
 }
 

@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "D2D1Graph.h"
 
 template<typename T>
 T computeDDR(T u_n, T semiMinorAxis, T epsilon)
@@ -36,18 +37,18 @@ T computeStability(T resultInOnePrecision, T resultInAnotherPrecision)
 }
 
 template<typename T>
-T algorithm1(T u_0, T v_0, T k, T alpha, double steps, std::fstream* output = nullptr)
+T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
 	T k_alpha = k * alpha;
 	for (double n = 0; n < steps; n++)
 	{
-		if (output)
+		if (pGraph)
 		{
 			REAL theta_n = n * k;
 			REAL radius_n = 1 / u_n;
-			*output << theta_n << ";" << radius_n << ";" << "\n";
+			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
 		T u_n_1 = u_n + (k * v_n);
@@ -56,38 +57,49 @@ T algorithm1(T u_0, T v_0, T k, T alpha, double steps, std::fstream* output = nu
 		u_n = u_n_1;
 		v_n = v_n_1;
 	}
+
+	if (pGraph)
+	{
+		REAL theta_n = steps * k;
+		REAL radius_n = 1 / u_n;
+		pGraph->DrawPointPolar(radius_n, theta_n);
+	}
 	return u_n;
 }
 
 template<typename T>
-T algorithm2(T u_0, T v_0, T k, T alpha, double steps, std::fstream* output = nullptr)
+T algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
 	for (double n = 0; n < steps; n++)
 	{
-		if (output)
+		if (pGraph)
 		{
 			REAL theta_n = n * k;
 			REAL radius_n = 1 / u_n;
-			*output << theta_n << ";" << radius_n << ";" << "\n";
+			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
-		T w_1 = u_n + (k * (v_n / 2));
-		T z_1 = v_n + (k * ((alpha - u_n) / 2));
-		T w_2 = u_n + (k * (z_1 / 2));
-		T z_2 = v_n + (k * ((alpha - w_1) / 2));
+		T w_1 = u_n + (k * v_n) / 2;
+		T z_1 = v_n + (k * (alpha - u_n)) / 2;
+		T w_2 = u_n + (k * z_1) / 2;
+		T z_2 = v_n + (k * (alpha - w_1)) / 2;
 		T w_3 = u_n + (k * z_2);
 		T z_3 = v_n + (k * (alpha - w_2));
 
-		T k_v_z = (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3) / 6));
-		T k_v_alfa_u_w = (k * (v_n + ((6 * alpha) - (u_n)-(2 * w_1) - (2 * w_2) - (w_3)) / 6));
-
-		T u_n_1 = u_n + k_v_z;
-		T v_n_1 = v_n + k_v_alfa_u_w;
+		T u_n_1 = u_n + (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3))) / 6;
+		T v_n_1 = v_n + (k * ((6 * alpha) - u_n - (2 * w_1) - (2 * w_2) - w_3)) / 6;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
+	}
+
+	if (pGraph)
+	{
+		REAL theta_n = steps * k;
+		REAL radius_n = 1 / u_n;
+		pGraph->DrawPointPolar(radius_n, theta_n);
 	}
 	return u_n;
 }
@@ -98,6 +110,9 @@ int main(int argc, char* argv[])
 	long alg = 0;
 	long dp = 0;
 	long print = 0;
+	double scale = 0;
+	double width = 0;
+	double height = 0;
 	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
 		if (!strcmp(argv[argIndex], "-alg") &&
@@ -124,17 +139,38 @@ int main(int argc, char* argv[])
 			print = atol(argv[argIndex + 1]);
 			argIndex++;
 		}
+		else if (!strcmp(argv[argIndex], "-width") &&
+			(argIndex + 1) < argc)
+		{
+			width = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
+		else if (!strcmp(argv[argIndex], "-height") &&
+			(argIndex + 1) < argc)
+		{
+			height = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
+		else if (!strcmp(argv[argIndex], "-scale") &&
+			(argIndex + 1) < argc)
+		{
+			scale = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
 	}
 	
 	if (steps == 0 ||
 		alg <= 0
-		|| alg >= 2)
+		|| alg > 2)
 	{
 		printf("Wrong params!\n");
 		printf("-alg \t Algorithm number {1, 2}.\n");
 		printf("-steps \t Algorithm step count.\n");
 		printf("-dp \t Use double precision. {0, 1}\n");
 		printf("-print \t Print results. {0, 1}\n");
+		printf("-scale \t Print scale.\n");
+		printf("-width \t Print width.\n");
+		printf("-height \t Print height.\n");
 		return 0;
 	}
 
@@ -144,10 +180,11 @@ int main(int argc, char* argv[])
 
 	printf("Creating output files...\n");
 
-	std::fstream dbOutput;
+	CD2D1Graph* pGraph = nullptr;
 	if (print)
 	{
-		dbOutput.open(runDatabaseFileName, std::ios_base::out);
+		pGraph = new CD2D1Graph(width, height, scale);
+		pGraph->BeginDraw();
 	}
 
 	std::fstream statsOutput;
@@ -201,22 +238,22 @@ int main(int argc, char* argv[])
 	{
 		if (dp)
 		{
-			u_n = algorithm1<double>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+			u_n = algorithm1<double>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm1<float>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+			u_n = algorithm1<float>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 	}
 	else if (alg == 2)
 	{
 		if (dp)
 		{
-			u_n = algorithm2<double>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+			u_n = algorithm2<double>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm2<float>(u_0, v_0, k, alpha, steps, print ? &dbOutput : nullptr);
+			u_n = algorithm2<float>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 	}
 	auto finishTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
@@ -232,8 +269,12 @@ int main(int argc, char* argv[])
 
 	if (print)
 	{
-		printf("Saving database...\n");
-		dbOutput.close();
+		pGraph->EndDraw();
+		pGraph->Present();
+
+		std::wstring pngFileName = _bstr_t(runDatabaseFileName);
+		pngFileName.append(L".png");
+		pGraph->SavePNG(pngFileName.c_str());
 	}
 
 	printf("Done!\n");
