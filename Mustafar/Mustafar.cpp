@@ -312,15 +312,3 @@ int main(int argc, char* argv[])
 	printf("Done!\n");
 	return 0;
 }
-
-/*
-Metodo para calcular tiempo de corrida en milisegundos si es necesario
-#include <time.h>
-clock_t start;
-clock_t end;
-double msecs;
-start = clock();
-end = clock();
-msecs = ((double)(end - start)) * 1000 / CLOCKS_PER_SEC;
-printf("Timer=%e\n", msecs);
-*/
