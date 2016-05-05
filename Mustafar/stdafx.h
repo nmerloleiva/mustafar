@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#define CREATE_DB 0
-
 typedef double REAL;
 
 #define experimentalDisturbance 0.001 //cambiarla para varios calculos

@@ -1,5 +1,12 @@
-// Mustafar.cpp : Defines the entry point for the console application.
-//
+/*
+**	Universidad de Buenos Aires
+**	Facultad de Ingeniería
+**	75.12 Análisis Numérico I
+**	Trabajo Práctico I
+**
+**	Merlo Leiva Nahuel –   Fabrizio Luis Cozza
+**	Padrón 92115       -   Padrón 97402
+*/
 
 #include "stdafx.h"
 #include "D2D1Graph.h"
