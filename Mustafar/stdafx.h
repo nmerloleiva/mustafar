@@ -13,12 +13,7 @@
 
 #define CREATE_DB 0
 
-#define DOUBLE_PRECISION 0
-#if DOUBLE_PRECISION
 typedef double REAL;
-#else
-typedef float REAL;
-#endif
 
 #define experimentalDisturbance 0.001 //cambiarla para varios calculos
 

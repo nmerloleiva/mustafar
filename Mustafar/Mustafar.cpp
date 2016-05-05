@@ -277,11 +277,19 @@ int main(int argc, char* argv[])
 	auto tiempoDeCorrida = std::chrono::duration_cast<std::chrono::nanoseconds>(finishTimer - startTimer).count();
 	printf("End!\n");
 
-	REAL ddr = computeDDR(u_n, semiMinorAxis, epsilon);
+	REAL ddr = 0;
+	if (dp)
+	{
+		ddr = computeDDR<double>(u_n, semiMinorAxis, epsilon);
+	}
+	else
+	{
+		ddr = computeDDR<float>(u_n, semiMinorAxis, epsilon);
+	}
 	printf("DDR=%e\n", ddr);
 
 	printf("Saving stats...\n");
-	statsOutput << (double)ddr << ";" << (double)tiempoDeCorrida << ";" << "\n";
+	statsOutput << ddr << ";" << (double)tiempoDeCorrida << ";" << "\n";
 	statsOutput.close();
 
 	if (print)
