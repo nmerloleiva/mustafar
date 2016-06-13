@@ -44,7 +44,7 @@ T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGr
 }
 
 template<typename T>
-T algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
+T algorithm2GR(T u_0, T v_0, T k, T alpha,T beta, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
@@ -57,15 +57,16 @@ T algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = null
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
+		T alpha_modified = alpha + beta * (pow(u_n, 2));
 		T w_1 = u_n + (k * v_n) / 2;
-		T z_1 = v_n + (k * (alpha - u_n)) / 2;
+		T z_1 = v_n + (k * (alpha_modified - u_n)) / 2;
 		T w_2 = u_n + (k * z_1) / 2;
-		T z_2 = v_n + (k * (alpha - w_1)) / 2;
+		T z_2 = v_n + (k * (alpha_modified - w_1)) / 2;
 		T w_3 = u_n + (k * z_2);
-		T z_3 = v_n + (k * (alpha - w_2));
+		T z_3 = v_n + (k * (alpha_modified - w_2));
 
 		T u_n_1 = u_n + (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3))) / 6;
-		T v_n_1 = v_n + (k * ((6 * alpha) - u_n - (2 * w_1) - (2 * w_2) - w_3)) / 6;
+		T v_n_1 = v_n + (k * ((6 * alpha_modified) - u_n - (2 * w_1) - (2 * w_2) - w_3)) / 6;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
@@ -229,11 +230,11 @@ int main(int argc, char* argv[])
 	{
 		if (dp)
 		{
-			u_n = algorithm2<double>(u_0, v_0, k, alpha, steps, pGraph);
+			u_n = algorithm2GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm2<float>(u_0, v_0, k, alpha, steps, pGraph);
+			u_n = algorithm2GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 	}
 	auto finishTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
