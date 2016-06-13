@@ -12,6 +12,7 @@
 #include "D2D1Graph.h"
 
 template<typename T>
+T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
@@ -217,9 +218,11 @@ int main(int argc, char* argv[])
 	{
 		if (dp)
 		{
+			u_n = algorithm1GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 		else
 		{
+			u_n = algorithm1GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 	}
 	else if (alg == 2)
