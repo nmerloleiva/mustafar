@@ -12,60 +12,11 @@
 #include "D2D1Graph.h"
 
 template<typename T>
-T computeDDR(T u_n, T semiMinorAxis, T epsilon)
-{
-	T q = semiMinorAxis * (1 - epsilon);
-	T DRR = (pow(u_n, -1) / q) - 1;
-	return DRR;
-}
-
-template<typename T>
-T disturbeSteps(T m1,T m2,T M, T epsilon,T semiMinorAxis) //pasar parametros ByRef
-{
-	m1 = lambda * (1.9891e+30) + experimentalDisturbance;; // kg
-	m2 = lambda * (3.301e+23) + experimentalDisturbance;; // kg
-	M = m1 + m2; // kg
-	semiMinorAxis = pow(lambda, 2) * (5.791e+10) + experimentalDisturbance; // m
-	epsilon = pow(lambda, -1) * 0.2056 + experimentalDisturbance; // -
-	if (epsilon <= 0 || epsilon >= 1)
-	{
-		printf("Epsilon=%e out of range!\n", epsilon);
-		return 0;
-	}
-}
-
-template<typename T>
-T computeCp(T disturbedResult)
-{
-	T originalResult = 10; //poner el resultado original aca
-	T relativeError = (originalResult - disturbedResult) / originalResult;
-	T C_p = relativeError * (1 / experimentalDisturbance); //numero de condicion del problema
-	return C_p;
-}
-
-template<typename T>
-T computeStability(T resultInOnePrecision, T resultInAnotherPrecision)
-{
-	//utilizar la precision y los resultados de algun paso en dos precisiones diferentes y calcular
-	machineUnitErrorInAnotherPrecision = 8;
-	machineUnitErrorInOnePrecision = 16;
-	totalMachineError = machineUnitErrorInAnotherPrecision - machineUnitErrorInOnePrecision;
-	stability = (resultInOnePrecision - resultInAnotherPrecision) / (resultInOnePrecision * totalMachineError);
-	return stability;
-}
-
-template<typename T>
-T computeCa(T stability, T C_p)
-{
-	Ca = stability / C_p;
-}
-
-template<typename T>
-T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
 	T k_alpha = k * alpha;
+	T k_beta = k * beta;
 	for (double n = 0; n < steps; n++)
 	{
 		if (pGraph)
@@ -76,7 +27,7 @@ T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = null
 		}
 
 		T u_n_1 = u_n + (k * v_n);
-		T v_n_1 = v_n - (k * u_n) + k_alpha;
+		T v_n_1 = v_n - (k * u_n) + k_alpha + k_beta * (pow(u_n, 2)); // u_n^2
 
 		u_n = u_n_1;
 		v_n = v_n_1;
@@ -232,6 +183,8 @@ int main(int argc, char* argv[])
 	REAL u_0 = pow(semiMinorAxis * (1 - epsilon), -1);
 	REAL v_0 = 0;
 	REAL k = (2 * M_PI) / steps;
+	REAL lightningSpeed = 3 * 10e8;
+	REAL lightningSpeedSquared = pow(lightningSpeed, 2); // c^2
 
 	printf("ALGORITHM=%d\n", alg);
 	printf("DOUBLE PRECISION=%d\n", dp);
@@ -243,6 +196,7 @@ int main(int argc, char* argv[])
 	printf("EPSILON=%e\n", epsilon);
 	printf("SEMI MINOR AXIS=%e\n", semiMinorAxis);
 	printf("SPECIFIC ANGULAR MOMENTUM SQUARED=%e\n", specificAngularMomentumSquared);
+	printf("LIGHTNING SPEED=%e\n", lightningSpeedSquared);
 	printf("U_0=%e\n", u_0);
 	printf("V_0=%e\n", v_0);
 	printf("STEP COUNT=%e\n", steps);
@@ -255,6 +209,7 @@ int main(int argc, char* argv[])
 
 	REAL alpha = mu * (pow(specificAngularMomentumSquared, -1));
 	REAL u_n = 0;
+	REAL beta = 3 * mu * (pow(lightningSpeedSquared, -1));
 
 	printf("Start!\n");
 	auto startTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
@@ -262,11 +217,9 @@ int main(int argc, char* argv[])
 	{
 		if (dp)
 		{
-			u_n = algorithm1<double>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm1<float>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 	}
 	else if (alg == 2)
@@ -284,6 +237,7 @@ int main(int argc, char* argv[])
 	auto tiempoDeCorrida = std::chrono::duration_cast<std::chrono::nanoseconds>(finishTimer - startTimer).count();
 	printf("End!\n");
 
+	/*
 	REAL ddr = 0;
 	if (dp)
 	{
@@ -294,9 +248,9 @@ int main(int argc, char* argv[])
 		ddr = computeDDR<float>(u_n, semiMinorAxis, epsilon);
 	}
 	printf("DDR=%e\n", ddr);
-
+	*/
 	printf("Saving stats...\n");
-	statsOutput << ddr << ";" << (double)tiempoDeCorrida << ";" << "\n";
+	//statsOutput << ddr << ";" << (double)tiempoDeCorrida << ";" << "\n";
 	statsOutput.close();
 
 	if (print)
