@@ -12,15 +12,6 @@
 #include "D2D1Graph.h"
 
 template<typename T>
-struct data
-{
-	T _zero_radius;
-	T _1_2_pi_radius;
-	T _pi_radius;
-	T _3_4_pi_radius;
-};
-
-template<typename T>
 T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 {
 	T q = semiMinorAxis * (1 - epsilon);
@@ -31,8 +22,8 @@ T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 template<typename T>
 T disturbeSteps(T m1,T m2,T M, T epsilon,T semiMinorAxis) //pasar parametros ByRef
 {
-	m1 = lambda * (1.9891e+30) + experimentalDisturbance; // kg
-	m2 = lambda * (3.301e+23) + experimentalDisturbance; // kg
+	m1 = lambda * (1.9891e+30) + experimentalDisturbance;; // kg
+	m2 = lambda * (3.301e+23) + experimentalDisturbance;; // kg
 	M = m1 + m2; // kg
 	semiMinorAxis = pow(lambda, 2) * (5.791e+10) + experimentalDisturbance; // m
 	epsilon = pow(lambda, -1) * 0.2056 + experimentalDisturbance; // -
@@ -70,24 +61,13 @@ T computeCa(T stability, T C_p)
 }
 
 template<typename T>
-T algorithm1(T u_0, T v_0, T k, T alpha, double steps, data<T>& data, CD2D1Graph* pGraph = nullptr)
+T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
 	T k_alpha = k * alpha;
-
-	double _1_4_steps = (steps / 4) * 1;
-	double _1_2_steps = (steps / 4) * 2;
-	double _3_4_steps = (steps / 4) * 3;
-	
 	for (double n = 0; n < steps; n++)
 	{
-		if (n == 0)
-		{
-
-		}
-		else if (n == ste)
-
 		if (pGraph)
 		{
 			REAL theta_n = n * k;
