@@ -30,7 +30,7 @@ T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGr
 		T u_n_1 = u_n + (k * v_n);
 		T v_n_1 = v_n - (k * u_n) + k_alpha + k_beta * (pow(u_n, 2)); // u_n^2
 
-		u_n = u_n_1;
+		u_n = u_n_1;                                                                                                                          
 		v_n = v_n_1;
 	}
 
@@ -44,7 +44,7 @@ T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGr
 }
 
 template<typename T>
-T algorithm2GR(T u_0, T v_0, T k, T alpha,T beta, double steps, CD2D1Graph* pGraph = nullptr)
+T algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
@@ -57,16 +57,16 @@ T algorithm2GR(T u_0, T v_0, T k, T alpha,T beta, double steps, CD2D1Graph* pGra
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
-		T alpha_modified = alpha + beta * (pow(u_n, 2));
 		T w_1 = u_n + (k * v_n) / 2;
-		T z_1 = v_n + (k * (alpha_modified - u_n)) / 2;
+		T z_1 = v_n + (k * (alpha + beta * pow(u_n, 2) - u_n)) / 2;
 		T w_2 = u_n + (k * z_1) / 2;
-		T z_2 = v_n + (k * (alpha_modified - w_1)) / 2;
+		T z_2 = v_n + (k * (alpha + beta * pow(w_1, 2) - w_1)) / 2;
 		T w_3 = u_n + (k * z_2);
-		T z_3 = v_n + (k * (alpha_modified - w_2));
+		T z_3 = v_n + (k * (alpha + beta * (pow(w_2, 2) - w_2));
 
+		T alpha_n_1 = alpha + beta * (pow(z_3, 2));
 		T u_n_1 = u_n + (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3))) / 6;
-		T v_n_1 = v_n + (k * ((6 * alpha_modified) - u_n - (2 * w_1) - (2 * w_2) - w_3)) / 6;
+		T v_n_1 = v_n + (k * ((6 * alpha) + (2 * beta * (pow(u_n, 2) + pow(w_1, 2) + pow(w_2, 2) + pow(w_3, 2)) - u_n - (2 * w_1) - (2 * w_2) - w_3)) / 6;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 	REAL u_0 = pow(semiMinorAxis * (1 - epsilon), -1);
 	REAL v_0 = 0;
 	REAL k = (2 * M_PI) / steps;
-	REAL lightningSpeed = 3 * 10e8;
+	REAL lightningSpeed = 3e+8;
 	REAL lightningSpeedSquared = pow(lightningSpeed, 2); // c^2
 
 	printf("ALGORITHM=%d\n", alg);
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
 	printf("EPSILON=%e\n", epsilon);
 	printf("SEMI MINOR AXIS=%e\n", semiMinorAxis);
 	printf("SPECIFIC ANGULAR MOMENTUM SQUARED=%e\n", specificAngularMomentumSquared);
-	printf("LIGHTNING SPEED=%e\n", lightningSpeedSquared);
+	printf("LIGHTNING SPEED SQUARED=%e\n", lightningSpeedSquared);
 	printf("U_0=%e\n", u_0);
 	printf("V_0=%e\n", v_0);
 	printf("STEP COUNT=%e\n", steps);
