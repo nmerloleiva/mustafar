@@ -12,15 +12,6 @@
 #include "D2D1Graph.h"
 
 template<typename T>
-struct data
-{
-	T _zero_radius;
-	T _1_2_pi_radius;
-	T _pi_radius;
-	T _3_4_pi_radius;
-};
-
-template<typename T>
 T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 {
 	T q = semiMinorAxis * (1 - epsilon);
@@ -70,24 +61,14 @@ T computeCa(T stability, T C_p)
 }
 
 template<typename T>
-T algorithm1(T u_0, T v_0, T k, T alpha, double steps, data<T>& data, CD2D1Graph* pGraph = nullptr)
+T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
 	T u_n = u_0;
 	T v_n = v_0;
 	T k_alpha = k * alpha;
 
-	double _1_4_steps = (steps / 4) * 1;
-	double _1_2_steps = (steps / 4) * 2;
-	double _3_4_steps = (steps / 4) * 3;
-	
 	for (double n = 0; n < steps; n++)
 	{
-		if (n == 0)
-		{
-
-		}
-		else if (n == ste)
-
 		if (pGraph)
 		{
 			REAL theta_n = n * k;
@@ -134,6 +115,75 @@ T algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = null
 
 		T u_n_1 = u_n + (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3))) / 6;
 		T v_n_1 = v_n + (k * ((6 * alpha) - u_n - (2 * w_1) - (2 * w_2) - w_3)) / 6;
+
+		u_n = u_n_1;
+		v_n = v_n_1;
+	}
+
+	if (pGraph)
+	{
+		REAL theta_n = steps * k;
+		REAL radius_n = 1 / u_n;
+		pGraph->DrawPointPolar(radius_n, theta_n);
+	}
+	return u_n;
+}
+
+template<typename T>
+T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
+{
+	T u_n = u_0;
+	T v_n = v_0;
+	T k_alpha = k * alpha;
+	T k_beta = k * beta;
+	for (double n = 0; n < steps; n++)
+	{
+		if (pGraph)
+		{
+			REAL theta_n = n * k;
+			REAL radius_n = 1 / u_n;
+			pGraph->DrawPointPolar(radius_n, theta_n);
+		}
+
+		T u_n_1 = u_n + (k * v_n);
+		T v_n_1 = v_n - (k * u_n) + k_alpha + k_beta * (pow(u_n, 2)); // u_n^2
+
+		u_n = u_n_1;
+		v_n = v_n_1;
+	}
+
+	if (pGraph)
+	{
+		REAL theta_n = steps * k;
+		REAL radius_n = 1 / u_n;
+		pGraph->DrawPointPolar(radius_n, theta_n);
+	}
+	return u_n;
+}
+
+template<typename T>
+T algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
+{
+	T u_n = u_0;
+	T v_n = v_0;
+	for (double n = 0; n < steps; n++)
+	{
+		if (pGraph)
+		{
+			REAL theta_n = n * k;
+			REAL radius_n = 1 / u_n;
+			pGraph->DrawPointPolar(radius_n, theta_n);
+		}
+
+		T w_1 = u_n + (k * v_n) / 2;
+		T z_1 = v_n + (k * (alpha + beta * pow(u_n, 2) - u_n)) / 2;
+		T w_2 = u_n + (k * z_1) / 2;
+		T z_2 = v_n + (k * (alpha + beta * pow(w_1, 2) - w_1)) / 2;
+		T w_3 = u_n + (k * z_2);
+		T z_3 = v_n + (k * (alpha + beta * (pow(w_2, 2) - w_2)));
+
+		T u_n_1 = u_n + (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3))) / 6;
+		T v_n_1 = v_n + (k * ((6 * alpha) + (beta * (pow(u_n, 2) + 2 * pow(w_1, 2) + 2 * pow(w_2, 2) + pow(w_3, 2)) - u_n - (2 * w_1) - (2 * w_2) - w_3))) / 6;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
@@ -204,11 +254,11 @@ int main(int argc, char* argv[])
 	}
 	
 	if (steps == 0 ||
-		alg <= 0
-		|| alg > 2)
+		alg < 1
+		|| alg > 4)
 	{
 		printf("Wrong params!\n");
-		printf("-alg \t Algorithm number {1, 2}.\n");
+		printf("-alg \t Algorithm number {1: Euler, 2: RK4, 3: Euler GR, 4: RK4 GR}.\n");
 		printf("-steps \t Algorithm step count.\n");
 		printf("-dp \t Use double precision. {0, 1}\n");
 		printf("-print \t Print results. {0, 1}\n");
@@ -252,6 +302,8 @@ int main(int argc, char* argv[])
 	REAL u_0 = pow(semiMinorAxis * (1 - epsilon), -1);
 	REAL v_0 = 0;
 	REAL k = (2 * M_PI) / steps;
+	REAL lightningSpeed = 3e+8;
+	REAL lightningSpeedSquared = pow(lightningSpeed, 2); // c^2
 
 	printf("ALGORITHM=%d\n", alg);
 	printf("DOUBLE PRECISION=%d\n", dp);
@@ -263,6 +315,7 @@ int main(int argc, char* argv[])
 	printf("EPSILON=%e\n", epsilon);
 	printf("SEMI MINOR AXIS=%e\n", semiMinorAxis);
 	printf("SPECIFIC ANGULAR MOMENTUM SQUARED=%e\n", specificAngularMomentumSquared);
+	printf("LIGHTNING SPEED SQUARED=%e\n", lightningSpeedSquared);
 	printf("U_0=%e\n", u_0);
 	printf("V_0=%e\n", v_0);
 	printf("STEP COUNT=%e\n", steps);
@@ -274,6 +327,7 @@ int main(int argc, char* argv[])
 	statsOutput << (double)k << ";";
 
 	REAL alpha = mu * (pow(specificAngularMomentumSquared, -1));
+	REAL beta = 3 * mu * (pow(lightningSpeedSquared, -1));
 	REAL u_n = 0;
 
 	printf("Start!\n");
@@ -300,6 +354,29 @@ int main(int argc, char* argv[])
 			u_n = algorithm2<float>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 	}
+	else if (alg == 3)
+	{
+		if (dp)
+		{
+			u_n = algorithm1GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
+		}
+		else
+		{
+			u_n = algorithm1GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
+		}
+	}
+	else if (alg == 4)
+	{
+		if (dp)
+		{
+			u_n = algorithm2GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
+		}
+		else
+		{
+			u_n = algorithm2GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
+		}
+	}
+
 	auto finishTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
 	auto tiempoDeCorrida = std::chrono::duration_cast<std::chrono::nanoseconds>(finishTimer - startTimer).count();
 	printf("End!\n");
