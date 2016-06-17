@@ -364,6 +364,41 @@ void trapezoidalIntegral()
 	_getch();
 }
 
+float simpsonsOneIntegral(float(*f)(float x), float a, float b, int n) {
+	float h = (b - a) / n;
+	float x;
+	float r;
+	char m = 0;
+	float s = 0.0;
+
+	for (x = a; x <= b; x += h) {
+		r = f(x);
+		if (x == a || x == b) {
+			s += r;
+		}
+		else {
+			m = !m;
+			s += r * (m + 1) * 2.0;
+		}
+	}
+	return s * (h / 3.0);
+}
+
+float simpsonsTwoIntegral(float(*f)(float x), float a, float b, int n)
+{
+	float h = (b - a) / n;
+	float sum1 = f(a + h / 2);
+	float sum2 = 0;
+
+	for (int i = 1; i < n - 1; i++)
+	{
+		sum1 = sum1 + f(a + h * i + h / 2);
+		sum2 = sum2 + f(a + h * i);
+	}
+	float answer = (h / 6) * (f(a) + f(b) + 4 * sum1 + 2 * sum2);
+	return answer;
+}
+
 int main(int argc, char* argv[])
 {
 	double np = 92115;
