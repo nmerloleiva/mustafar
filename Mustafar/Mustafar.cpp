@@ -312,6 +312,20 @@ void pointsInterpolator() //seria para ejecutar el main este proceso
 	_getch();
 }
 
+double rectangularIntegral(double(*f)(double x), double a, double b, int steps) {
+	double step = (b - a) / n;  // width of each small rectangle
+	double area = 0.0;  // signed area
+	for (int i = 0; i < steps; i++) {
+		area += f(a + (i + 0.5) * step) * step; // sum up each small rectangle
+	}
+	return area;
+}
+
+double calculateIntegral()
+{
+	return rectangularIntegral(cos, 0, M_PI / 2, 10); //function, I[a.b], steps
+}
+
 int main(int argc, char* argv[])
 {
 	double np = 92115;
