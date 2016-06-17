@@ -10,6 +10,8 @@
 #include <chrono>
 #include <stdio.h>
 #include <tchar.h>
+# include <conio.h>
+# include <malloc.h>
 
 typedef double REAL;
 

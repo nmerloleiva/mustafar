@@ -276,6 +276,42 @@ alg_data algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Gra
 	return data;
 }
 
+void lagrange(double x, double X[], double y[], int Lit)
+{
+
+	double r = 0, num = 1, den = 1;
+	for (int i = 0; i<Lit; i++){ //para el total de polinomios
+		for (int j = 0; j<Lit; j++){ //para cada polinomio
+			if (i != j){ num *= (x - X[j]); den *= (X[i] - X[j]); }
+		}
+		num *= y[i];
+		printf("Interacion %d valor %lf\n", i, num / den);
+		_getch();
+		r += num / den;
+		num = den = 1;
+	}
+	printf("\nEl resultado es: %lf", r);
+}
+
+void pointsInterpolator() //seria para ejecutar el main este proceso
+{
+	int m;
+	double *X, *Y, x;
+	void clrscr();
+	printf("cuantas entradas tendra la tabla?\n\t\t");
+	scanf_s("%d", &m);
+	X = (double*)malloc(sizeof(double)*m);
+	printf("Ingresa la tabla los valores de X:\n");
+	for (int i = 0; i<m; i++) scanf_s("%lf", &X[i]);
+	printf("\nIngresa la tabla los valores de Y:\n");
+	Y = (double*)malloc(sizeof(double)*m);
+	for (int i = 0; i<m; i++) scanf_s("%lf", &Y[i]);
+	printf("Escribe el valor X para el cual se encontrara el valor de Y\n");
+	scanf_s("%lf", &x);
+	lagrange(x, X, Y, m);
+	_getch();
+}
+
 int main(int argc, char* argv[])
 {
 	double np = 92115;
