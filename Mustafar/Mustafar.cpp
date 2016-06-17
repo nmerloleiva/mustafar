@@ -175,15 +175,20 @@ T algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGr
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
-		T w_1 = u_n + (k * v_n) / 2;
+		T w_1 = u_n + (k * v_n) / 2;                                                                                                                                               
 		T z_1 = v_n + (k * (alpha + beta * pow(u_n, 2) - u_n)) / 2;
 		T w_2 = u_n + (k * z_1) / 2;
 		T z_2 = v_n + (k * (alpha + beta * pow(w_1, 2) - w_1)) / 2;
 		T w_3 = u_n + (k * z_2);
-		T z_3 = v_n + (k * (alpha + beta * (pow(w_2, 2) - w_2)));
+		T z_3 = v_n + (k * (alpha + beta * pow(w_2, 2) - w_2));
 
 		T u_n_1 = u_n + (k * (v_n + ((2 * z_1) + (2 * z_2) + z_3))) / 6;
-		T v_n_1 = v_n + (k * ((6 * alpha) + (beta * (pow(u_n, 2) + 2 * pow(w_1, 2) + 2 * pow(w_2, 2) + pow(w_3, 2)) - u_n - (2 * w_1) - (2 * w_2) - w_3))) / 6;
+		T v_n_1 = v_n + (k * (
+			(alpha + beta * pow(u_n, 2) - u_n) + 
+			2 * (alpha + beta * pow(w_1, 2) - w_1) + 
+			2 * (alpha + beta * pow(w_2, 2) - w_2) +
+			(alpha + beta * pow(w_3, 2) - w_3)
+			)) / 6;
 
 		u_n = u_n_1;
 		v_n = v_n_1;
