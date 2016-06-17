@@ -11,6 +11,15 @@
 #include "stdafx.h"
 #include "D2D1Graph.h"
 
+struct alg_data
+{
+	REAL u_n_0_4_N; // 0 PI
+	REAL u_n_1_4_N; // PI / 4
+	REAL u_n_2_4_N; // PI / 2
+	REAL u_n_3_4_N; // 3 PI / 4
+	REAL u_n_4_4_N; // 2 PI
+};
+
 template<typename T>
 T computeDDR(T u_n, T semiMinorAxis, T epsilon)
 {
@@ -61,18 +70,33 @@ T computeCa(T stability, T C_p)
 }
 
 template<typename T>
-T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
+alg_data algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
+	alg_data data;
+	data.u_n_0_4_N = u_0;
 	T u_n = u_0;
 	T v_n = v_0;
 	T k_alpha = k * alpha;
 
 	for (double n = 0; n < steps; n++)
 	{
+		if (n == (steps / 4))
+		{
+			data.u_n_1_4_N = u_n;
+		}
+		else if (n == (steps / 2))
+		{
+			data.u_n_2_4_N = u_n;
+		}
+		else if (n == (3 * steps / 4))
+		{
+			data.u_n_3_4_N = u_n;
+		}
+
 		if (pGraph)
 		{
-			REAL theta_n = n * k;
-			REAL radius_n = 1 / u_n;
+			T theta_n = n * k;
+			T radius_n = 1 / u_n;
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
@@ -85,24 +109,40 @@ T algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = null
 
 	if (pGraph)
 	{
-		REAL theta_n = steps * k;
-		REAL radius_n = 1 / u_n;
+		T theta_n = steps * k;
+		T radius_n = 1 / u_n;
 		pGraph->DrawPointPolar(radius_n, theta_n);
 	}
-	return u_n;
+	data.u_n_4_4_N = u_n;
+	return data;
 }
 
 template<typename T>
-T algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
+alg_data algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
+	alg_data data;
+	data.u_n_0_4_N = u_0;
 	T u_n = u_0;
 	T v_n = v_0;
 	for (double n = 0; n < steps; n++)
 	{
+		if (n == (steps / 4))
+		{
+			data.u_n_1_4_N = u_n;
+		}
+		else if (n == (steps / 2))
+		{
+			data.u_n_2_4_N = u_n;
+		}
+		else if (n == (3 * steps / 4))
+		{
+			data.u_n_3_4_N = u_n;
+		}
+
 		if (pGraph)
 		{
-			REAL theta_n = n * k;
-			REAL radius_n = 1 / u_n;
+			T theta_n = n * k;
+			T radius_n = 1 / u_n;
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
@@ -122,26 +162,42 @@ T algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = null
 
 	if (pGraph)
 	{
-		REAL theta_n = steps * k;
-		REAL radius_n = 1 / u_n;
+		T theta_n = steps * k;
+		T radius_n = 1 / u_n;
 		pGraph->DrawPointPolar(radius_n, theta_n);
 	}
-	return u_n;
+	data.u_n_4_4_N = u_n;
+	return data;
 }
 
 template<typename T>
-T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
+alg_data algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
 {
+	alg_data data;
+	data.u_n_0_4_N = u_0;
 	T u_n = u_0;
 	T v_n = v_0;
 	T k_alpha = k * alpha;
 	T k_beta = k * beta;
 	for (double n = 0; n < steps; n++)
 	{
+		if (n == (steps / 4))
+		{
+			data.u_n_1_4_N = u_n;
+		}
+		else if (n == (steps / 2))
+		{
+			data.u_n_2_4_N = u_n;
+		}
+		else if (n == (3 * steps / 4))
+		{
+			data.u_n_3_4_N = u_n;
+		}
+
 		if (pGraph)
 		{
-			REAL theta_n = n * k;
-			REAL radius_n = 1 / u_n;
+			T theta_n = n * k;
+			T radius_n = 1 / u_n;
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
@@ -154,24 +210,40 @@ T algorithm1GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGr
 
 	if (pGraph)
 	{
-		REAL theta_n = steps * k;
-		REAL radius_n = 1 / u_n;
+		T theta_n = steps * k;
+		T radius_n = 1 / u_n;
 		pGraph->DrawPointPolar(radius_n, theta_n);
 	}
-	return u_n;
+	data.u_n_4_4_N = u_n;
+	return data;
 }
 
 template<typename T>
-T algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
+alg_data algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGraph = nullptr)
 {
+	alg_data data;
+	data.u_n_0_4_N = u_0;
 	T u_n = u_0;
 	T v_n = v_0;
 	for (double n = 0; n < steps; n++)
 	{
+		if (n == (steps / 4))
+		{
+			data.u_n_1_4_N = u_n;
+		}
+		else if (n == (steps / 2))
+		{
+			data.u_n_2_4_N = u_n;
+		}
+		else if (n == (3 * steps / 4))
+		{
+			data.u_n_3_4_N = u_n;
+		}
+
 		if (pGraph)
 		{
-			REAL theta_n = n * k;
-			REAL radius_n = 1 / u_n;
+			T theta_n = n * k;
+			T radius_n = 1 / u_n;
 			pGraph->DrawPointPolar(radius_n, theta_n);
 		}
 
@@ -196,11 +268,12 @@ T algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Graph* pGr
 
 	if (pGraph)
 	{
-		REAL theta_n = steps * k;
-		REAL radius_n = 1 / u_n;
+		T theta_n = steps * k;
+		T radius_n = 1 / u_n;
 		pGraph->DrawPointPolar(radius_n, theta_n);
 	}
-	return u_n;
+	data.u_n_4_4_N = u_n;
+	return data;
 }
 
 int main(int argc, char* argv[])
@@ -333,7 +406,7 @@ int main(int argc, char* argv[])
 
 	REAL alpha = mu * (pow(specificAngularMomentumSquared, -1));
 	REAL beta = 3 * mu * (pow(lightningSpeedSquared, -1));
-	REAL u_n = 0;
+	alg_data data;
 
 	printf("Start!\n");
 	auto startTimer = std::chrono::high_resolution_clock::now(); //inicio calculo del tiempo en nanosegundos
@@ -341,44 +414,44 @@ int main(int argc, char* argv[])
 	{
 		if (dp)
 		{
-			u_n = algorithm1<double>(u_0, v_0, k, alpha, steps, pGraph);
+			data = algorithm1<double>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm1<float>(u_0, v_0, k, alpha, steps, pGraph);
+			data = algorithm1<float>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 	}
 	else if (alg == 2)
 	{
 		if (dp)
 		{
-			u_n = algorithm2<double>(u_0, v_0, k, alpha, steps, pGraph);
+			data = algorithm2<double>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm2<float>(u_0, v_0, k, alpha, steps, pGraph);
+			data = algorithm2<float>(u_0, v_0, k, alpha, steps, pGraph);
 		}
 	}
 	else if (alg == 3)
 	{
 		if (dp)
 		{
-			u_n = algorithm1GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
+			data = algorithm1GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm1GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
+			data = algorithm1GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 	}
 	else if (alg == 4)
 	{
 		if (dp)
 		{
-			u_n = algorithm2GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
+			data = algorithm2GR<double>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 		else
 		{
-			u_n = algorithm2GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
+			data = algorithm2GR<float>(u_0, v_0, k, alpha, beta, steps, pGraph);
 		}
 	}
 
@@ -389,16 +462,22 @@ int main(int argc, char* argv[])
 	REAL ddr = 0;
 	if (dp)
 	{
-		ddr = computeDDR<double>(u_n, semiMinorAxis, epsilon);
+		ddr = computeDDR<double>(data.u_n_4_4_N, semiMinorAxis, epsilon);
 	}
 	else
 	{
-		ddr = computeDDR<float>(u_n, semiMinorAxis, epsilon);
+		ddr = computeDDR<float>(data.u_n_4_4_N, semiMinorAxis, epsilon);
 	}
 	printf("DDR=%e\n", ddr);
 
 	printf("Saving stats...\n");
-	statsOutput << ddr << ";" << (double)tiempoDeCorrida << ";" << "\n";
+	statsOutput << ddr << ";";
+	statsOutput << (double)tiempoDeCorrida << ";";
+	statsOutput << 1.0 / data.u_n_0_4_N << ";";
+	statsOutput << 1.0 / data.u_n_1_4_N << ";";
+	statsOutput << 1.0 / data.u_n_2_4_N << ";";
+	statsOutput << 1.0 / data.u_n_3_4_N << ";";
+	statsOutput << "\n";
 	statsOutput.close();
 
 	if (print)
