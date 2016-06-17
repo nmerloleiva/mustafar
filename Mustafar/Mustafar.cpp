@@ -278,6 +278,8 @@ alg_data algorithm2GR(T u_0, T v_0, T k, T alpha, T beta, double steps, CD2D1Gra
 
 int main(int argc, char* argv[])
 {
+	double np = 92115;
+	double lambda = np / LAMBDA_DEN;
 	double steps = 0;
 	long alg = 0;
 	long dp = 0;
@@ -329,6 +331,12 @@ int main(int argc, char* argv[])
 			scale = atof(argv[argIndex + 1]);
 			argIndex++;
 		}
+		else if (!strcmp(argv[argIndex], "-lambda") &&
+			(argIndex + 1) < argc)
+		{
+			lambda = atof(argv[argIndex + 1]);
+			argIndex++;
+		}
 	}
 	
 	if (steps == 0 ||
@@ -343,6 +351,7 @@ int main(int argc, char* argv[])
 		printf("-scale \t Print scale.\n");
 		printf("-width \t Print width.\n");
 		printf("-height \t Print height.\n");
+		printf("-lambda \t Override lambda.\n");
 		return 0;
 	}
 
@@ -362,9 +371,7 @@ int main(int argc, char* argv[])
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_stats.csv", std::ios_base::app);
 
-	REAL np = 92115;
 	REAL G = 6.673e-11; // N m^2 / kg ^2
-	REAL lambda = np / LAMBDA_DEN;
 	REAL m1 = lambda * (1.9891e+30); // kg
 	REAL m2 = lambda * (3.301e+23); // kg
 	REAL M = m1 + m2; // kg
