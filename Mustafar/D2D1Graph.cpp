@@ -160,15 +160,37 @@ HRESULT CD2D1Graph::DrawPointPolar(FLOAT radius, FLOAT radians)
 	return DrawPoint(x, y);
 }
 
+HRESULT CD2D1Graph::DrawPointPolar(FLOAT radius, FLOAT radians, FLOAT pointRadius, D2D1_COLOR_F color)
+{
+	FLOAT x = radius * cos(radians);
+	FLOAT y = radius * sin(radians);
+	return DrawPoint(x, y, pointRadius, color);
+}
+
 HRESULT CD2D1Graph::DrawPoint(FLOAT x, FLOAT y)
 {
 	D2D1_ELLIPSE ellipse;
 	ellipse.point.x = x / m_Scale + (m_Width / 2);
 	ellipse.point.y = y / m_Scale + (m_Height / 2);
-	ellipse.radiusX = 3;
-	ellipse.radiusY = 3;
+	ellipse.radiusX = 1;
+	ellipse.radiusY = 1;
 	m_pD2D1DeviceContext->DrawEllipse(ellipse, m_pSolidBrush2, 1.0);
 	m_pD2D1DeviceContext->FillEllipse(ellipse, m_pSolidBrush2);
+	return S_OK;
+}
+
+HRESULT CD2D1Graph::DrawPoint(FLOAT x, FLOAT y, FLOAT pointRadius, D2D1_COLOR_F color)
+{
+	D2D1_ELLIPSE ellipse;
+	ellipse.point.x = x / m_Scale + (m_Width / 2);
+	ellipse.point.y = y / m_Scale + (m_Height / 2);
+	ellipse.radiusX = pointRadius;
+	ellipse.radiusY = pointRadius;
+	ID2D1SolidColorBrushPtr brush = nullptr;
+	HRESULT hr = m_pD2D1DeviceContext->CreateSolidColorBrush(color, &brush);
+	RETURN_ON_FAIL(hr);
+	m_pD2D1DeviceContext->DrawEllipse(ellipse, brush, 1.0);
+	m_pD2D1DeviceContext->FillEllipse(ellipse, brush);
 	return S_OK;
 }
 

@@ -47,7 +47,11 @@ public:
 
 	HRESULT DrawPointPolar(FLOAT radius, FLOAT radians);
 
+	HRESULT DrawPointPolar(FLOAT radius, FLOAT radians, FLOAT pointRadius, D2D1_COLOR_F color);
+
 	HRESULT DrawPoint(FLOAT x, FLOAT y);
+
+	HRESULT DrawPoint(FLOAT x, FLOAT y, FLOAT pointRadius, D2D1_COLOR_F color);
 
 	HRESULT EndDraw();
 
