@@ -36,6 +36,7 @@ struct alg_params
 	REAL k;
 	REAL alpha;
 	REAL beta;
+	REAL epsilon;
 	CD2D1Graph* pGraph;
 };
 
@@ -406,8 +407,19 @@ float simpsonsTwoIntegral(float(*f)(float x), float a, float b, int n)
 
 void solve_A_1(alg_params params, alg_data data)
 {
-	REAL majorAxis = (1 / data.u_n_min) + (1 / data.u_n_max);
+	// Cálculo del semi eje mayor como: a =	(radio perihelio + radio afelio) / 2
+	REAL semiMajorAxis = ((1 / data.u_n_min) + (1 / data.u_n_max)) / 2;
+	
+	// Propagación de error
+	//REAL_EPSILON
 
+	// Cálculo del semi eje menor como: b = a * square_root(1 - e^2) 
+	REAL semiMinorAxis = semiMajorAxis * sqrt((1 - pow(params.epsilon, 2)));
+
+	// Propagación de error
+
+
+	// Guardar resultados
 
 	if (params.pGraph)
 	{
@@ -520,16 +532,16 @@ int main(int argc, char* argv[])
 	REAL m1 = params.lambda * (1.9891e+30); // kg
 	REAL m2 = params.lambda * (3.301e+23); // kg
 	REAL M = m1 + m2; // kg
-	REAL epsilon = pow(params.lambda, -1) * 0.2056; // -
-	if (epsilon <= 0 || epsilon >= 1)
+	params.epsilon = pow(params.lambda, -1) * 0.2056; // -
+	if (params.epsilon <= 0 || params.epsilon >= 1)
 	{
-		printf("Epsilon=%e out of range!\n", epsilon);
+		printf("Epsilon=%e out of range!\n", params.epsilon);
 		return 0;
 	}
 	REAL semiMinorAxis = pow(params.lambda, 2) * (5.791e+10); // m
 	REAL mu = G * M; // m^3 / s^2
-	REAL specificAngularMomentumSquared = semiMinorAxis * mu * (1 - pow(epsilon, 2)); // m^4 / s^2
-	params.u_0 = pow(semiMinorAxis * (1 - epsilon), -1);
+	REAL specificAngularMomentumSquared = semiMinorAxis * mu * (1 - pow(params.epsilon, 2)); // m^4 / s^2
+	params.u_0 = pow(semiMinorAxis * (1 - params.epsilon), -1);
 	params.v_0 = 0;
 	params.k = (2 * M_PI) / params.steps;
 	REAL lightningSpeed = 3e+8;
@@ -542,7 +554,7 @@ int main(int argc, char* argv[])
 	printf("M1=%e\n", m1);
 	printf("M2=%e\n", m2);
 	printf("MU=%e\n", mu);
-	printf("EPSILON=%e\n", epsilon);
+	printf("EPSILON=%e\n", params.epsilon);
 	printf("SEMI MINOR AXIS=%e\n", semiMinorAxis);
 	printf("SPECIFIC ANGULAR MOMENTUM SQUARED=%e\n", specificAngularMomentumSquared);
 	printf("LIGHTNING SPEED SQUARED=%e\n", lightningSpeedSquared);

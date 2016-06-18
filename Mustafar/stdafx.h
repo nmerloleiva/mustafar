@@ -14,6 +14,7 @@
 # include <malloc.h>
 
 typedef double REAL;
+#define REAL_EPSILON DBL_EPSILON
 
 #define experimentalDisturbance 0.001 //cambiarla para varios calculos
 
