@@ -411,15 +411,26 @@ void solve_A_1(alg_params params, alg_data data)
 	REAL semiMajorAxis = ((1 / data.u_n_min) + (1 / data.u_n_max)) / 2;
 	
 	// Propagación de error
-	//REAL_EPSILON
+	REAL deltaSemiMajorAxis = abs(1 / (2 * (pow(data.u_n_min, 2)))) * REAL_EPSILON + 
+		abs(1 / (2 * (pow(data.u_n_max, 2)))) * REAL_EPSILON;
 
 	// Cálculo del semi eje menor como: b = a * square_root(1 - e^2) 
 	REAL semiMinorAxis = semiMajorAxis * sqrt((1 - pow(params.epsilon, 2)));
 
 	// Propagación de error
-
+	REAL deltaSemiMinorAxis = abs(sqrt((1 - pow(params.epsilon, 2)))) * deltaSemiMajorAxis +
+		abs(semiMajorAxis * pow(2 * sqrt((1 - pow(params.epsilon, 2))), -1) * 2 * params.epsilon) * REAL_EPSILON;
 
 	// Guardar resultados
+	std::fstream statsOutput;
+	statsOutput.open("mustafar_solve_A_1.csv", std::ios_base::app);
+	statsOutput << params.steps << ";";
+	statsOutput << semiMajorAxis << ";";
+	statsOutput << deltaSemiMajorAxis << ";";
+	statsOutput << semiMinorAxis << ";";
+	statsOutput << deltaSemiMinorAxis << ";";
+	statsOutput << "\n";
+	statsOutput.close();
 
 	if (params.pGraph)
 	{
