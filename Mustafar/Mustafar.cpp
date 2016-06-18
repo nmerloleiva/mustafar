@@ -146,17 +146,16 @@ alg_data algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph
 template<typename T>
 alg_data algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph = nullptr)
 {
-	alg_data data;
 	T u_n = u_0;
 	T v_n = v_0;
+
+	alg_data data;
+	INIT_DATA(data, u_n);
+
 	for (double n = 0; n < steps; n++)
 	{
-		if (pGraph)
-		{
-			T theta_n = n * k;
-			T radius_n = 1 / u_n;
-			pGraph->DrawPointPolar(radius_n, theta_n);
-		}
+		FILL_DATA_MIN_MAX(data, u_n, n);
+		PRINT(pGraph, n, k, u_n);
 
 		T w_1 = u_n + (k * v_n) / 2;
 		T z_1 = v_n + (k * (alpha - u_n)) / 2;
@@ -172,13 +171,8 @@ alg_data algorithm2(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph
 		v_n = v_n_1;
 	}
 
-	if (pGraph)
-	{
-		T theta_n = steps * k;
-		T radius_n = 1 / u_n;
-		pGraph->DrawPointPolar(radius_n, theta_n);
-	}
-	data.u_n_4_4_N = u_n;
+	PRINT(pGraph, steps, k, u_n);
+	FILL_DATA_U_N_2_PI(data, u_n);
 	return data;
 }
 
@@ -424,6 +418,7 @@ void solve_A_1(alg_params params, alg_data data)
 	// Guardar resultados
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_solve_A_1.csv", std::ios_base::app);
+	statsOutput << params.alg << ";";
 	statsOutput << params.steps << ";";
 	statsOutput << semiMajorAxis << ";";
 	statsOutput << deltaSemiMajorAxis << ";";
