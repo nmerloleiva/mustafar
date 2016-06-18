@@ -456,6 +456,7 @@ int main(int argc, char* argv[])
 	params.scale = 0;
 	params.width = 0;
 	params.height = 0;
+	params.pGraph = nullptr;
 	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
 		if (!strcmp(argv[argIndex], "-alg") &&
@@ -621,7 +622,7 @@ int main(int argc, char* argv[])
 
 	solve_A_1(params, data);
 
-	if (params.print)
+	if (params.pGraph)
 	{
 
 		params.pGraph->EndDraw();
