@@ -276,42 +276,6 @@ alg_data runAlgorithm(alg_params params)
 	return alg_data();
 }
 
-void lagrange(double x, double X[], double y[], int Lit)
-{
-
-	double r = 0, num = 1, den = 1;
-	for (int i = 0; i<Lit; i++){ //para el total de polinomios
-		for (int j = 0; j<Lit; j++){ //para cada polinomio
-			if (i != j){ num *= (x - X[j]); den *= (X[i] - X[j]); }
-		}
-		num *= y[i];
-		printf("Interacion %d valor %lf\n", i, num / den);
-		_getch();
-		r += num / den;
-		num = den = 1;
-	}
-	printf("\nEl resultado es: %lf", r);
-}
-
-void pointsInterpolator() //seria para ejecutar el main este proceso
-{
-	int m;
-	double *X, *Y, x;
-	void clrscr();
-	printf("cuantas entradas tendra la tabla?\n\t\t");
-	scanf_s("%d", &m);
-	X = (double*)malloc(sizeof(double)*m);
-	printf("Ingresa la tabla los valores de X:\n");
-	for (int i = 0; i<m; i++) scanf_s("%lf", &X[i]);
-	printf("\nIngresa la tabla los valores de Y:\n");
-	Y = (double*)malloc(sizeof(double)*m);
-	for (int i = 0; i<m; i++) scanf_s("%lf", &Y[i]);
-	printf("Escribe el valor X para el cual se encontrara el valor de Y\n");
-	scanf_s("%lf", &x);
-	lagrange(x, X, Y, m);
-	_getch();
-}
-
 double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, double steps){
 	double error, numerator, denominator;
 
@@ -377,6 +341,65 @@ double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoin
 	return 0;
 }
 
+double computeKeplerThirdLawError(double period, double semiMajorAxis, double periodError, double deltaSemiMajorAxis){
+	double firstTerm, secondTerm, error;
+
+	firstTerm = ((2 * period) / (pow(semiMajorAxis, 3))) * periodError; // (2*T / b^3) * deltaT
+	secondTerm = ((3 * (pow(period, 2))) / ((pow(semiMajorAxis, 4)))) * deltaSemiMajorAxis; // (3*T^2/b^4) * deltaAxis
+
+	error = firstTerm + secondTerm;
+
+	return error;
+}
+
+double computeKeplerThirdLaw(double period, double semiMajorAxis){
+	double quotient, numerator, denominator;
+
+	numerator = pow(period, 2); //periodo^2
+	denominator = pow(semiMajorAxis, 3);//b^3
+
+	quotient = numerator / denominator; // cociente
+
+	return quotient;
+}
+
+
+void lagrange(double x, double X[], double y[], int Lit)
+{
+
+	double r = 0, num = 1, den = 1;
+	for (int i = 0; i<Lit; i++){ //para el total de polinomios
+		for (int j = 0; j<Lit; j++){ //para cada polinomio
+			if (i != j){ num *= (x - X[j]); den *= (X[i] - X[j]); }
+		}
+		num *= y[i];
+		printf("Interacion %d valor %lf\n", i, num / den);
+		_getch();
+		r += num / den;
+		num = den = 1;
+	}
+	printf("\nEl resultado es: %lf", r);
+}
+
+void pointsInterpolator() //seria para ejecutar el main este proceso
+{
+	int m;
+	double *X, *Y, x;
+	void clrscr();
+	printf("cuantas entradas tendra la tabla?\n\t\t");
+	scanf_s("%d", &m);
+	X = (double*)malloc(sizeof(double)*m);
+	printf("Ingresa la tabla los valores de X:\n");
+	for (int i = 0; i<m; i++) scanf_s("%lf", &X[i]);
+	printf("\nIngresa la tabla los valores de Y:\n");
+	Y = (double*)malloc(sizeof(double)*m);
+	for (int i = 0; i<m; i++) scanf_s("%lf", &Y[i]);
+	printf("Escribe el valor X para el cual se encontrara el valor de Y\n");
+	scanf_s("%lf", &x);
+	lagrange(x, X, Y, m);
+	_getch();
+}
+
 float f(float x) //function example
 {
 	return(1 / (1 + pow(x, 2)));
@@ -439,7 +462,90 @@ float simpsonsOneIntegral(float(*f)(float x), float a, float b, int n) {
 	}
 	return s * (h / 3.0);
 }
+/*
+double simpsonIntegral(){
 
+		int a, b, n;
+		cout << "Enter upper limit, b:"; cin >> b;
+		cout << "Enter lower limit, a:"; cin >> a;
+		cout << "\nEnter number of Simpson's interval, n (even number only):"; cin >> n;
+		long double dx, t = 0;
+		dx = (long double)(b - a) / n;
+		long double fx[n + 1];
+		for (int i = 0; i <= n; i++){
+			if (i == 0){
+				t = a;
+			}
+			else if (i == n){
+				t = b;
+			}
+			else{
+				t = a + (i*dx);
+			}
+			//cout << "t = " << t << endl; // im just curious to know
+			fx[i] = (1.36*pow(10, -10))*t*t*t*t - (1.23*pow(10, -7))*t*t*t + (4.12*pow(10, -6))*t*t + (3.95*pow(10, -4))*t - (8.58*pow(10, -2));
+			//fx[i] = (double)1 / (t + 1 );
+			//cout << "fx[" << i << "] = " << fx[i] << endl; // im just curious to know
+		}
+		long double sum = 0, area = 0;
+		for (int i = 0; i <= n; i++){
+			if (i == 0 || i == n){
+				sum = sum + fx[i];
+			}
+			else if (i % 2 == 0){
+				sum = sum + 2 * fx[i];
+			}
+			else {
+				sum = sum + 4 * fx[i];
+			}
+		}
+		area = (dx / 3)*sum;
+		cout << "sum = " << sum << endl;
+		cout << "dx = " << dx << endl;
+		cout << "\nThe Area is = " << area << endl;
+		return 0;
+	}
+}
+
+float f(float x)
+{
+	return(x);
+}
+
+float simpsonsRule()
+{
+	int n, i;
+	float s1 = 0, s2 = 0, sum, a, b, h;
+	printf("Enter the value of upper limit = ");
+	scanf("%f", &b);
+	printf("Enter the value of lower limit = ");
+	scanf("%f", &a);
+	printf("Enter the number of intervals = ");
+	scanf("%d", &n);
+	h = (b - a) / n;
+	if (n % 2 == 0)
+	{
+		for (i = 1; i <= n - 1; i++)
+		{
+			if (i % 2 == 0)
+			{
+				s1 = s1 + f(a + i*h);
+			}
+			else
+			{
+				s2 = s2 + f(a + i*h);
+			}
+		}
+		sum = h / 3 * (f(a) + f(b) + 4 * s2 + 2 * s1);
+		printf("the value is = %f", sum);
+	}
+	else
+	{
+		printf("the rule is not appliciable");
+	}
+	getch();
+}
+*/
 float simpsonsTwoIntegral(float(*f)(float x), float a, float b, int n)
 {
 	float h = (b - a) / n;
