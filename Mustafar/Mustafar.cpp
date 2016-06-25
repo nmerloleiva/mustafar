@@ -312,6 +312,17 @@ void pointsInterpolator() //seria para ejecutar el main este proceso
 	_getch();
 }
 
+double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, double steps){
+	double error, numerator, denominator;
+
+	numerator = pow(finalIntervalPoint - inicialIntervalPoint, 2);
+	denominator = 24 * (pow(steps, 2));
+
+	error = (numerator / denominator); // * (multiplicado por) derivada segunda evaluada en un punto del intervalo 
+
+	return error;
+}
+
 double periodCalculation(double area, int steps){
 	double period;
 	period = (area * 2) / steps;
@@ -340,11 +351,17 @@ double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoin
 
 		totalArea = aboveArea + belowArea;
 
+		double areaErrorAbove, areaErrorBelow, totalAreaError;
+		areaErrorAbove = computeAreaError(inicialIntervalPoint, finalIntervalPoint, steps);
+		areaErrorBelow = computeAreaError(finalIntervalPoint, finalIntervalPointBis, steps);
+
+		totalAreaError = areaErrorAbove + areaErrorBelow;
+
 		// Guardar resultados
 		std::fstream statsOutput;
 		statsOutput.open("mustafar_solve_area_period.csv", std::ios_base::app);
 		statsOutput << totalArea << ";";
-		//	statsOutput << areaError << ";";
+		statsOutput << totalAreaError << ";";
 		statsOutput << periodCalculation(totalArea, steps) << ";";
 		//	statsOutput << periodError << ";";
 		statsOutput << "\n";
