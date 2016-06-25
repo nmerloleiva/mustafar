@@ -323,6 +323,12 @@ double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, 
 	return error;
 }
 
+double computePeriodError(double areaError, double steps){
+	double error;
+	error = (2 / steps) * areaError;  //asumo que el error del paso es 0
+	return error;
+}
+
 double periodCalculation(double area, int steps){
 	double period;
 	period = (area * 2) / steps;
@@ -363,7 +369,7 @@ double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoin
 		statsOutput << totalArea << ";";
 		statsOutput << totalAreaError << ";";
 		statsOutput << periodCalculation(totalArea, steps) << ";";
-		//	statsOutput << periodError << ";";
+		statsOutput << computePeriodError(totalAreaError,steps) << ";";
 		statsOutput << "\n";
 		statsOutput.close();
 	}
