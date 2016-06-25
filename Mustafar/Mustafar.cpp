@@ -312,13 +312,46 @@ void pointsInterpolator() //seria para ejecutar el main este proceso
 	_getch();
 }
 
-double rectangularIntegral(double(*f)(double x), double a, double b, int steps) { //function, I[a,b]
-	double step = (b - a) / steps;  // width of each small rectangle
-	double area = 0.0;  // signed area
-	for (int i = 0; i < steps; i++) {
-		area += f(a + (i + 0.5) * step) * step; // sum up each small rectangle
+double periodCalculation(double area, int steps){
+	double period;
+	period = (area * 2) / steps;
+	return period;
+}
+
+double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoint, double finalIntervalPointBis, int steps) {
+
+	double aboveArea, belowArea, abovex_i, belowx_i, aboveH, belowH, totalArea;
+	inicialIntervalPoint = 0;
+	finalIntervalPoint = 0, 3; // perihelio (puse un numero cualquiera)
+	finalIntervalPointBis = 0, 4; // afelio (puse un numero cualquiera)
+	steps = 10000000;          // Use larger value for better approximation
+
+	aboveH = (finalIntervalPoint - inicialIntervalPoint) / steps; // Computar ancho del intervalo arriba
+	belowH = (finalIntervalPointBis - finalIntervalPoint) / steps; // Computar ancho del intervalo abajo
+	aboveArea = 0.0;                        // Clear running area
+	belowArea = 0.0;						// Clear running area
+
+	for (int i = 1; i <= steps - 1; i++)
+	{
+		abovex_i = inicialIntervalPoint + steps*aboveH;
+		belowx_i = finalIntervalPoint + steps*belowH;
+		aboveArea = aboveArea + (aboveH * (abovex_i));   // f(x_i) = x (abovex_i) para este ejemplo
+		belowArea = belowArea + (belowH * (belowx_i));   // f(x_i) = x (belowx_i) para este ejemplo
+
+		totalArea = aboveArea + belowArea;
+
+		// Guardar resultados
+		std::fstream statsOutput;
+		statsOutput.open("mustafar_solve_area_period.csv", std::ios_base::app);
+		statsOutput << totalArea << ";";
+		//	statsOutput << areaError << ";";
+		statsOutput << periodCalculation(totalArea, steps) << ";";
+		//	statsOutput << periodError << ";";
+		statsOutput << "\n";
+		statsOutput.close();
 	}
-	return area;
+
+	return 0;
 }
 
 float f(float x) //function example
