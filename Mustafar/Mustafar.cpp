@@ -315,7 +315,7 @@ void pointsInterpolator() //seria para ejecutar el main este proceso
 double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, double steps){
 	double error, numerator, denominator;
 
-	numerator = pow(finalIntervalPoint - inicialIntervalPoint, 2);
+	numerator = pow(finalIntervalPoint - inicialIntervalPoint, 3);
 	denominator = 24 * (pow(steps, 2));
 
 	error = (numerator / denominator); // * (multiplicado por) derivada segunda evaluada en un punto del intervalo 
