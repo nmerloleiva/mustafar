@@ -287,19 +287,23 @@ double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, 
 	return error;
 }
 
-double computePeriodError(double areaError, double steps){
-	double error;
-	error = (2 / steps) * areaError;  //asumo que el error del paso es 0
+double computePeriodError(double areaError, double area, double specificAngularMomentumSquared, double specificAngularMomentumSquaredError){
+	double error, firstTerm, secondTerm;
+	
+	firstTerm = (2 / sqrt(specificAngularMomentumSquared)) * areaError;
+	secondTerm = ((2 * area) * (1 / specificAngularMomentumSquared)) * specificAngularMomentumSquaredError;
+
+	error = firstTerm + secondTerm ;
 	return error;
 }
 
-double periodCalculation(double area, int steps){
+double periodCalculation(double area, int h){
 	double period;
-	period = (area * 2) / steps;
+	period = (area * 2) / h;
 	return period;
 }
 
-double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoint, double finalIntervalPointBis, int steps) {
+double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoint, double finalIntervalPointBis, double specificAngularMomentumSquared, int steps) {
 
 	double aboveArea, belowArea, abovex_i, belowx_i, aboveH, belowH, totalArea;
 	inicialIntervalPoint = 0;
@@ -332,8 +336,8 @@ double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoin
 		statsOutput.open("mustafar_solve_area_period.csv", std::ios_base::app);
 		statsOutput << totalArea << ";";
 		statsOutput << totalAreaError << ";";
-		statsOutput << periodCalculation(totalArea, steps) << ";";
-		statsOutput << computePeriodError(totalAreaError,steps) << ";";
+		statsOutput << periodCalculation(totalArea, sqrt(specificAngularMomentumSquared)) << ";";
+		statsOutput << computePeriodError(totalAreaError, totalArea, specificAngularMomentumSquared, specificAngularMomentumSquared/*Error*/) << ";";
 		statsOutput << "\n";
 		statsOutput.close();
 	}
@@ -368,10 +372,10 @@ double f(double x) //function f(x) = x
 	return(x);
 }
 
-double computeSimpsonsRuleError(int steps){
+double computeSimpsonsRuleError(double h){
 	double error, numerator, denominator;
 
-	numerator = pow(steps, 5);
+	numerator = pow(h, 5);
 	denominator = 90;
 
 	error = (numerator / denominator); // * (multiplicado por) cota de derivada cuarta evaluada en un punto del intervalo
