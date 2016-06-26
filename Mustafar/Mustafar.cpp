@@ -363,6 +363,38 @@ double computeKeplerThirdLaw(double period, double semiMajorAxis){
 	return quotient;
 }
 
+double f(double x) //function f(x) = x
+{
+	return(x);
+}
+
+double simpsonsRule(double inicialIntervalPoint, double finalIntervalPoint, int steps)
+{
+	double s1 = 0, s2 = 0; //Clear running area
+	double area, h;
+	h = (finalIntervalPoint - inicialIntervalPoint) / steps; // Computar ancho del intervalo arriba
+	if (steps % 2 == 0)
+	{
+		for (int i = 1; i <= steps - 1; i++)
+		{
+			if (i % 2 == 0)
+			{
+				s1 = s1 + f(inicialIntervalPoint + i*h);
+			}
+			else
+			{
+				s2 = s2 + f(inicialIntervalPoint + i*h);
+			}
+		}
+		area = h / 3 * (f(inicialIntervalPoint) + f(finalIntervalPoint) + 4 * s2 + 2 * s1);
+		printf("The value is = %f", area);
+	}
+	else
+	{
+		printf("The rule is not appliciable");
+	}
+	_getch();
+}
 
 void lagrange(double x, double X[], double y[], int Lit)
 {
@@ -441,124 +473,6 @@ void trapezoidalIntegral()
 	ans = h / 3 * (y[0] + y[n] + 4 * so + 2 * se);
 	printf("\nfinal integration is %f", ans);
 	_getch();
-}
-
-float simpsonsOneIntegral(float(*f)(float x), float a, float b, int n) {
-	float h = (b - a) / n;
-	float x;
-	float r;
-	char m = 0;
-	float s = 0.0;
-
-	for (x = a; x <= b; x += h) {
-		r = f(x);
-		if (x == a || x == b) {
-			s += r;
-		}
-		else {
-			m = !m;
-			s += r * (m + 1) * 2.0;
-		}
-	}
-	return s * (h / 3.0);
-}
-/*
-double simpsonIntegral(){
-
-		int a, b, n;
-		cout << "Enter upper limit, b:"; cin >> b;
-		cout << "Enter lower limit, a:"; cin >> a;
-		cout << "\nEnter number of Simpson's interval, n (even number only):"; cin >> n;
-		long double dx, t = 0;
-		dx = (long double)(b - a) / n;
-		long double fx[n + 1];
-		for (int i = 0; i <= n; i++){
-			if (i == 0){
-				t = a;
-			}
-			else if (i == n){
-				t = b;
-			}
-			else{
-				t = a + (i*dx);
-			}
-			//cout << "t = " << t << endl; // im just curious to know
-			fx[i] = (1.36*pow(10, -10))*t*t*t*t - (1.23*pow(10, -7))*t*t*t + (4.12*pow(10, -6))*t*t + (3.95*pow(10, -4))*t - (8.58*pow(10, -2));
-			//fx[i] = (double)1 / (t + 1 );
-			//cout << "fx[" << i << "] = " << fx[i] << endl; // im just curious to know
-		}
-		long double sum = 0, area = 0;
-		for (int i = 0; i <= n; i++){
-			if (i == 0 || i == n){
-				sum = sum + fx[i];
-			}
-			else if (i % 2 == 0){
-				sum = sum + 2 * fx[i];
-			}
-			else {
-				sum = sum + 4 * fx[i];
-			}
-		}
-		area = (dx / 3)*sum;
-		cout << "sum = " << sum << endl;
-		cout << "dx = " << dx << endl;
-		cout << "\nThe Area is = " << area << endl;
-		return 0;
-	}
-}
-
-float f(float x)
-{
-	return(x);
-}
-
-float simpsonsRule()
-{
-	int n, i;
-	float s1 = 0, s2 = 0, sum, a, b, h;
-	printf("Enter the value of upper limit = ");
-	scanf("%f", &b);
-	printf("Enter the value of lower limit = ");
-	scanf("%f", &a);
-	printf("Enter the number of intervals = ");
-	scanf("%d", &n);
-	h = (b - a) / n;
-	if (n % 2 == 0)
-	{
-		for (i = 1; i <= n - 1; i++)
-		{
-			if (i % 2 == 0)
-			{
-				s1 = s1 + f(a + i*h);
-			}
-			else
-			{
-				s2 = s2 + f(a + i*h);
-			}
-		}
-		sum = h / 3 * (f(a) + f(b) + 4 * s2 + 2 * s1);
-		printf("the value is = %f", sum);
-	}
-	else
-	{
-		printf("the rule is not appliciable");
-	}
-	getch();
-}
-*/
-float simpsonsTwoIntegral(float(*f)(float x), float a, float b, int n)
-{
-	float h = (b - a) / n;
-	float sum1 = f(a + h / 2);
-	float sum2 = 0;
-
-	for (int i = 1; i < n - 1; i++)
-	{
-		sum1 = sum1 + f(a + h * i + h / 2);
-		sum2 = sum2 + f(a + h * i);
-	}
-	float answer = (h / 6) * (f(a) + f(b) + 4 * sum1 + 2 * sum2);
-	return answer;
 }
 
 void solve_A_1(alg_params params, alg_data data)
