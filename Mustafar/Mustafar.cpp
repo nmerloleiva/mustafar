@@ -306,11 +306,7 @@ double periodCalculation(double area, int h){
 double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoint, double finalIntervalPointBis, double specificAngularMomentumSquared, int steps) {
 
 	double aboveArea, belowArea, abovex_i, belowx_i, aboveH, belowH, totalArea;
-	inicialIntervalPoint = 0;
-	finalIntervalPoint = 0, 3; // perihelio (puse un numero cualquiera)
-	finalIntervalPointBis = 0, 4; // afelio (puse un numero cualquiera)
-	steps = 10000000;          // Use larger value for better approximation
-
+	double specificAngularMomentumSquaredError = 0.5e-4;
 	aboveH = (finalIntervalPoint - inicialIntervalPoint) / steps; // Computar ancho del intervalo arriba
 	belowH = (finalIntervalPointBis - finalIntervalPoint) / steps; // Computar ancho del intervalo abajo
 	aboveArea = 0.0;                        // Clear running area
@@ -337,7 +333,7 @@ double rectangularIntegral(double inicialIntervalPoint, double finalIntervalPoin
 		statsOutput << totalArea << ";";
 		statsOutput << totalAreaError << ";";
 		statsOutput << periodCalculation(totalArea, sqrt(specificAngularMomentumSquared)) << ";";
-		statsOutput << computePeriodError(totalAreaError, totalArea, specificAngularMomentumSquared, specificAngularMomentumSquared/*Error*/) << ";";
+		statsOutput << computePeriodError(totalAreaError, totalArea, specificAngularMomentumSquared, specificAngularMomentumSquaredError) << ";";
 		statsOutput << "\n";
 		statsOutput.close();
 	}
