@@ -408,11 +408,12 @@ double simpsonsRule(double inicialIntervalPoint, double finalIntervalPoint, int 
 		printf("The rule is not appliciable");
 	}
 	_getch();
+	return area;
 }
 
 double lagrangeInterpolation(){
 	{
-		double x[2], y[2], quantityOfPoints, pointToInterpolate, interpolatedPoint = 0, s = 1, t = 1;
+		double x[100], y[100], quantityOfPoints, pointToInterpolate, interpolatedPoint = 0, s = 1, t = 1;
 		int i, j, cutCondition = 1;
 		//Respective values of the variables x and y
 		quantityOfPoints = 3;
