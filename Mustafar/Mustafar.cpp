@@ -282,7 +282,7 @@ double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, 
 	numerator = pow(finalIntervalPoint - inicialIntervalPoint, 3);
 	denominator = 24 * (pow(steps, 2));
 
-	error = (numerator / denominator); // * (multiplicado por) derivada segunda evaluada en un punto del intervalo 
+	error = (numerator / denominator); // * (multiplicado por) cota de derivada segunda evaluada en un punto del intervalo
 
 	return error;
 }
@@ -366,6 +366,16 @@ double computeKeplerThirdLaw(double period, double semiMajorAxis){
 double f(double x) //function f(x) = x
 {
 	return(x);
+}
+
+double computeSimpsonsRuleError(int steps){
+	double error, numerator, denominator;
+
+	numerator = pow(steps, 5);
+	denominator = 90;
+
+	error = (numerator / denominator); // * (multiplicado por) cota de derivada cuarta evaluada en un punto del intervalo
+	return error;
 }
 
 double simpsonsRule(double inicialIntervalPoint, double finalIntervalPoint, int steps)
