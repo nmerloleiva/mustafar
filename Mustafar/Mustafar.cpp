@@ -410,40 +410,49 @@ double simpsonsRule(double inicialIntervalPoint, double finalIntervalPoint, int 
 	_getch();
 }
 
-void lagrange(double x, double X[], double y[], int Lit)
-{
-
-	double r = 0, num = 1, den = 1;
-	for (int i = 0; i<Lit; i++){ //para el total de polinomios
-		for (int j = 0; j<Lit; j++){ //para cada polinomio
-			if (i != j){ num *= (x - X[j]); den *= (X[i] - X[j]); }
+double lagrangeInterpolation(){
+	{
+		double x[2], y[2], quantityOfPoints, pointToInterpolate, interpolatedPoint = 0, s = 1, t = 1;
+		int i, j, cutCondition = 1;
+		//Respective values of the variables x and y
+		quantityOfPoints = 3;
+		x[0] = 0;
+		x[1] = 1;
+		x[2] = 2;
+		y[0] = 0;
+		y[1] = 1;
+		y[2] = 2;
+		printf("\n\n Table entered is as follows :\n\n");
+		for (i = 0; i<quantityOfPoints; i++)
+		{
+			printf("%0.3f\t%0.3f", x[i], y[i]);
+			printf("\n");
 		}
-		num *= y[i];
-		printf("Interacion %d valor %lf\n", i, num / den);
-		_getch();
-		r += num / den;
-		num = den = 1;
-	}
-	printf("\nEl resultado es: %lf", r);
-}
 
-void pointsInterpolator() //seria para ejecutar el main este proceso
-{
-	int m;
-	double *X, *Y, x;
-	void clrscr();
-	printf("cuantas entradas tendra la tabla?\n\t\t");
-	scanf_s("%d", &m);
-	X = (double*)malloc(sizeof(double)*m);
-	printf("Ingresa la tabla los valores de X:\n");
-	for (int i = 0; i<m; i++) scanf_s("%lf", &X[i]);
-	printf("\nIngresa la tabla los valores de Y:\n");
-	Y = (double*)malloc(sizeof(double)*m);
-	for (int i = 0; i<m; i++) scanf_s("%lf", &Y[i]);
-	printf("Escribe el valor X para el cual se encontrara el valor de Y\n");
-	scanf_s("%lf", &x);
-	lagrange(x, X, Y, m);
-	_getch();
+		while (cutCondition == 1)
+		{
+			//Value of the x to find the respective value of y
+			pointToInterpolate = 3.5;
+			for (i = 0; i<quantityOfPoints; i++)
+			{
+				s = 1;
+				t = 1;
+				for (j = 0; j<quantityOfPoints; j++)
+				{
+					if (j != i)
+					{
+						s = s*(pointToInterpolate - x[j]);
+						t = t*(x[i] - x[j]);
+					}
+				}
+				interpolatedPoint = interpolatedPoint + ((s / t)*y[i]);
+			}
+			printf("\n\n The respective value of the variable y is: %f", interpolatedPoint);
+			printf("\n\n Do you want to continue?\n\n Press 1 to continue and any other key to exit");
+			scanf_s("%cutCondition", &cutCondition);
+		}
+		return interpolatedPoint;
+	}
 }
 
 float f(float x) //function example
