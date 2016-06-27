@@ -123,6 +123,8 @@ alg_data algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph
 	T v_n = v_0;
 	T k_alpha = k * alpha;
 
+	double theta_n;
+
 	alg_data data;
 	INIT_DATA(data, u_n);
 
@@ -140,6 +142,7 @@ alg_data algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph
 
 	PRINT(pGraph, steps, k, u_n);
 	FILL_DATA_U_N_2_PI(data, u_n);
+	statsOutput.close();
 	return data;
 }
 
@@ -457,7 +460,7 @@ void solve_A_2(alg_params params, double specificMomentum,double semiMinorAxis, 
 	areaRealError = computeAreaRealError(semiMinorAxis, semiMayorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
 	period = periodCalculation(areaReal, specificMomentum);
 	periodError = computePeriodError(areaRealError, areaReal, specificMomentum, specificAngularMomentumSquaredError);
-	
+
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_solve_alg2_A_2.csv", std::ios_base::app);
 	statsOutput << params.alg << ";";
@@ -471,6 +474,27 @@ void solve_A_2(alg_params params, double specificMomentum,double semiMinorAxis, 
 	statsOutput << "\n";
 	statsOutput.close();
 
+}
+
+void solve_A_4(double semiMayorAxis, alg_params params){
+
+	double energy;
+
+	REAL G = 6.673e-11; // N m^2 / kg ^2
+	REAL m1 = params.lambda * (1.9891e+30); // kg
+	REAL m2 = params.lambda * (3.301e+23); // kg
+	REAL M = m1 + m2; // kg
+	REAL mu = G * M; // m^3 / s^2
+
+	energy = ((-1) * mu)  / (2 * semiMayorAxis);
+
+	std::fstream statsOutput;
+	statsOutput.open("mustafar_solve_alg1_A_4.csv", std::ios_base::app);
+	statsOutput << params.alg << ";";
+	statsOutput << params.steps << ";";
+	statsOutput << energy << ";";
+	statsOutput << "\n";
+	statsOutput.close();
 }
 
 void solve_A_1(alg_params params, alg_data data, double specificMomentum)
@@ -489,9 +513,11 @@ void solve_A_1(alg_params params, alg_data data, double specificMomentum)
 	REAL deltaSemiMinorAxis = abs(sqrt((1 - pow(params.epsilon, 2)))) * deltaSemiMajorAxis +
 		abs(semiMajorAxis * pow(2 * sqrt((1 - pow(params.epsilon, 2))), -1) * 2 * params.epsilon) * REAL_EPSILON;
 
-	solve_A_2(params, specificMomentum, semiMinorAxis, semiMajorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
+	//solve_A_2(params, specificMomentum, semiMinorAxis, semiMajorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
 
+	solve_A_4(semiMajorAxis, params);
 
+	/*
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_solve_A_1.csv", std::ios_base::app);
 	statsOutput << params.alg << ";";
@@ -512,6 +538,7 @@ void solve_A_1(alg_params params, alg_data data, double specificMomentum)
 	REAL max_radius_n = 1 / data.u_n_max;
 	params.pGraph->DrawPointPolar(max_radius_n, max_theta_n, 3, D2D1::ColorF(1, 0, 0, 1));
 	}
+	*/
 }
 
 int main(int argc, char* argv[])
