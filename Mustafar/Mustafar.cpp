@@ -299,71 +299,31 @@ double computePeriodError(double areaError, double area, double specificAngularM
 
 double periodCalculation(double area, int h){
 	double period;
-	period = (area * 2) / h;
+	period = ((area * 2) / h) * (-1);
 	return period;
-}
-
-double rectangularIntegralAboveBelow(double inicialIntervalPoint, double finalIntervalPoint, double finalIntervalPointBis, double specificAngularMomentumSquared, int steps) {
-
-	double aboveArea, belowArea, abovex_i, belowx_i, aboveH, belowH, totalArea;
-	double specificAngularMomentumSquaredError = 0.5e-4;
-	aboveH = (finalIntervalPoint - inicialIntervalPoint) / steps; // Computar ancho del intervalo arriba
-	belowH = (finalIntervalPointBis - finalIntervalPoint) / steps; // Computar ancho del intervalo abajo
-	aboveArea = 0.0;                        // Clear running area
-	belowArea = 0.0;						// Clear running area
-	double areaErrorAbove, areaErrorBelow = 0, totalAreaError;
-
-	for (int i = 1; i <= steps - 1; i++)
-	{
-		abovex_i = inicialIntervalPoint + steps*aboveH;
-		belowx_i = finalIntervalPoint + steps*belowH;
-		aboveArea = aboveArea + (aboveH * abovex_i);   // f(x_i) = x (abovex_i) para este ejemplo
-		belowArea = belowArea + (belowH * belowx_i);   // f(x_i) = x (belowx_i) para este ejemplo
-		totalArea = aboveArea + belowArea;
-		areaErrorAbove = computeAreaError(inicialIntervalPoint, finalIntervalPoint, steps);
-		areaErrorBelow = computeAreaError(finalIntervalPoint, finalIntervalPointBis, steps);
-		totalAreaError = areaErrorAbove + areaErrorBelow;
-	}
-
-	// Guardar resultados
-	std::fstream statsOutput;
-	statsOutput.open("mustafar_solve_area_period.csv", std::ios_base::app);
-	statsOutput << totalArea << ";";
-	statsOutput << totalAreaError << ";";
-	statsOutput << periodCalculation(totalArea, sqrt(specificAngularMomentumSquared)) << ";";
-	statsOutput << computePeriodError(totalAreaError, totalArea, specificAngularMomentumSquared, specificAngularMomentumSquaredError) << ";";
-	statsOutput << "\n";
-	statsOutput.close();
-
-	return 0;
 }
 
 double rectangularIntegralGeneral(double inicialIntervalPoint, double finalIntervalPoint, double specificAngularMomentumSquared, double semiMinorAxis, double semiMayorAxis, int steps) {
 
-	double area, x_i, h, totalArea;
-	double specificAngularMomentumSquaredError = 0.5e-4;
+	double area, x_i, h, areaError;
+	double specificAngularMomentumSquaredError = 0.5e-16; //double
 	h = (finalIntervalPoint - inicialIntervalPoint) / steps; // Computar ancho del intervalo arriba
 	area = 0.0;                        // Clear running area
-	double areaError, totalAreaError;
 
 	for (int i = 1; i <= steps - 1; i++)
 	{
 		x_i = inicialIntervalPoint + steps*h;
-		area = area + (h * sqrt((1 - (x_i) / pow(semiMayorAxis, 2)) * pow(semiMinorAxis, 2)));   // f(x_i) = x (abovex_i) para este ejemplo
-		
-		totalArea = area;
+		area = area + (h * sqrt(((1 - (pow(x_i, 2) / pow(semiMayorAxis, 2))) * pow(semiMinorAxis, 2)))); //f(x) = (1 - (x^2 / a^2) * b^2)^1/2
 		areaError = computeAreaError(inicialIntervalPoint, finalIntervalPoint, steps);
-	
-		totalAreaError = areaError;
 	}
 
 	// Guardar resultados
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_solve_area_period.csv", std::ios_base::app);
-	statsOutput << totalArea << ";";
-	statsOutput << totalAreaError << ";";
-	statsOutput << periodCalculation(totalArea, sqrt(specificAngularMomentumSquared)) << ";";
-	statsOutput << computePeriodError(totalAreaError, totalArea, specificAngularMomentumSquared, specificAngularMomentumSquaredError) << ";";
+	statsOutput << area << ";";
+	statsOutput << areaError << ";";
+	statsOutput << periodCalculation(area, sqrt(specificAngularMomentumSquared)) << ";";
+	statsOutput << computePeriodError(areaError, area, specificAngularMomentumSquared, specificAngularMomentumSquaredError) << ";";
 	statsOutput << "\n";
 	statsOutput.close();
 
@@ -481,13 +441,45 @@ double lagrangeInterpolation(){
 	}
 }
 
-void solve_A_1(alg_params params, alg_data data)
+double computeAreaRealError(double semiMinorAxis, double semiMayorAxis, double deltaSemiMajorAxis, double deltaSemiMinorAxis){
+
+	double areaError;
+	areaError = M_PI * semiMinorAxis * deltaSemiMajorAxis + M_PI * semiMayorAxis * deltaSemiMinorAxis;
+	return areaError;
+}
+
+void solve_A_2(alg_params params, double specificMomentum,double semiMinorAxis, double semiMayorAxis, double deltaSemiMajorAxis, double deltaSemiMinorAxis){
+
+	double areaReal, areaRealError, period, periodError;
+	double specificAngularMomentumSquaredError = 0.5e-16;
+
+	areaReal = M_PI * semiMinorAxis * semiMayorAxis;
+	areaRealError = computeAreaRealError(semiMinorAxis, semiMayorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
+	period = periodCalculation(areaReal, specificMomentum);
+	periodError = computePeriodError(areaRealError, areaReal, specificMomentum, specificAngularMomentumSquaredError);
+	
+	std::fstream statsOutput;
+	statsOutput.open("mustafar_solve_alg2_A_2.csv", std::ios_base::app);
+	statsOutput << params.alg << ";";
+	statsOutput << params.steps << ";";
+	statsOutput << areaReal << ";";
+	statsOutput << areaRealError << ";";
+	statsOutput << period << ";";
+	statsOutput << periodError << ";";
+	statsOutput << computeKeplerThirdLaw(period, semiMayorAxis) << ";";
+	statsOutput << computeKeplerThirdLawError(period,semiMayorAxis,periodError,deltaSemiMajorAxis)<< ";";
+	statsOutput << "\n";
+	statsOutput.close();
+
+}
+
+void solve_A_1(alg_params params, alg_data data, double specificMomentum)
 {
 	// Cálculo del semi eje mayor como: a =	(radio perihelio + radio afelio) / 2
 	REAL semiMajorAxis = ((1 / data.u_n_min) + (1 / data.u_n_max)) / 2;
-	
+
 	// Propagación de error
-	REAL deltaSemiMajorAxis = abs(1 / (2 * (pow(data.u_n_min, 2)))) * REAL_EPSILON + 
+	REAL deltaSemiMajorAxis = abs(1 / (2 * (pow(data.u_n_min, 2)))) * REAL_EPSILON +
 		abs(1 / (2 * (pow(data.u_n_max, 2)))) * REAL_EPSILON;
 
 	// Cálculo del semi eje menor como: b = a * square_root(1 - e^2) 
@@ -497,7 +489,8 @@ void solve_A_1(alg_params params, alg_data data)
 	REAL deltaSemiMinorAxis = abs(sqrt((1 - pow(params.epsilon, 2)))) * deltaSemiMajorAxis +
 		abs(semiMajorAxis * pow(2 * sqrt((1 - pow(params.epsilon, 2))), -1) * 2 * params.epsilon) * REAL_EPSILON;
 
-	// Guardar resultados
+	solve_A_2(params, specificMomentum, semiMinorAxis, semiMajorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
+
 
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_solve_A_1.csv", std::ios_base::app);
@@ -509,16 +502,15 @@ void solve_A_1(alg_params params, alg_data data)
 	statsOutput << deltaSemiMinorAxis << ";";
 	statsOutput << "\n";
 	statsOutput.close();
-	
 	if (params.pGraph)
 	{
-		REAL min_theta_n = data.u_n_min_step * params.k;
-		REAL min_radius_n = 1 / data.u_n_min;
-		params.pGraph->DrawPointPolar(min_radius_n, min_theta_n, 3, D2D1::ColorF(1, 0, 0, 1));
+	REAL min_theta_n = data.u_n_min_step * params.k;
+	REAL min_radius_n = 1 / data.u_n_min;
+	params.pGraph->DrawPointPolar(min_radius_n, min_theta_n, 3, D2D1::ColorF(1, 0, 0, 1));
 
-		REAL max_theta_n = data.u_n_max_step * params.k;
-		REAL max_radius_n = 1 / data.u_n_max;
-		params.pGraph->DrawPointPolar(max_radius_n, max_theta_n, 3, D2D1::ColorF(1, 0, 0, 1));
+	REAL max_theta_n = data.u_n_max_step * params.k;
+	REAL max_radius_n = 1 / data.u_n_max;
+	params.pGraph->DrawPointPolar(max_radius_n, max_theta_n, 3, D2D1::ColorF(1, 0, 0, 1));
 	}
 }
 
@@ -698,7 +690,7 @@ int main(int argc, char* argv[])
 	//statsOutput << "\n";
 	//statsOutput.close();
 
-	solve_A_1(params, data);
+	solve_A_1(params, data,sqrt(specificAngularMomentumSquared));
 
 
 	if (params.pGraph)
