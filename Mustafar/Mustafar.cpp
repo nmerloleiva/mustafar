@@ -142,7 +142,6 @@ alg_data algorithm1(T u_0, T v_0, T k, T alpha, double steps, CD2D1Graph* pGraph
 
 	PRINT(pGraph, steps, k, u_n);
 	FILL_DATA_U_N_2_PI(data, u_n);
-	statsOutput.close();
 	return data;
 }
 
@@ -279,13 +278,17 @@ alg_data runAlgorithm(alg_params params)
 	return alg_data();
 }
 
+double secondDerivateValue(){
+	return 0.5; //value input
+}
+
 double computeAreaError(double inicialIntervalPoint, double finalIntervalPoint, double steps){
 	double error, numerator, denominator;
 
 	numerator = pow(finalIntervalPoint - inicialIntervalPoint, 3);
 	denominator = 24 * (pow(steps, 2));
 
-	error = (numerator / denominator); // * (multiplicado por) cota de derivada segunda evaluada en un punto del intervalo
+	error = (numerator / denominator) * secondDerivateValue();
 
 	return error;
 }
@@ -344,6 +347,7 @@ double computeKeplerThirdLawError(double period, double semiMajorAxis, double pe
 	return error;
 }
 
+
 double computeKeplerThirdLaw(double period, double semiMajorAxis){
 	double quotient, numerator, denominator;
 
@@ -355,9 +359,8 @@ double computeKeplerThirdLaw(double period, double semiMajorAxis){
 	return quotient;
 }
 
-double f(double x) //function f(x) = x
-{
-	return(x);
+double fourthDerivateValue(){
+	return 0.5; //value input
 }
 
 double computeSimpsonsRuleError(double h){
@@ -366,8 +369,13 @@ double computeSimpsonsRuleError(double h){
 	numerator = pow(h, 5);
 	denominator = 90;
 
-	error = (numerator / denominator); // * (multiplicado por) cota de derivada cuarta evaluada en un punto del intervalo
+	error = (numerator / denominator) * fourthDerivateValue();
 	return error;
+}
+
+double f(double x) //function f(x)
+{
+	return(x);
 }
 
 double simpsonsRule(double inicialIntervalPoint, double finalIntervalPoint, int steps)
@@ -399,18 +407,18 @@ double simpsonsRule(double inicialIntervalPoint, double finalIntervalPoint, int 
 	return area;
 }
 
-double lagrangeInterpolation(){
+double lagrangeInterpolation(double x_1, double x_2, double x_3, double y_1, double y_2, double y_3){
 	{
 		double x[100], y[100], quantityOfPoints, pointToInterpolate, interpolatedPoint = 0, s = 1, t = 1;
 		int i, j, cutCondition = 1;
 		//Respective values of the variables x and y
 		quantityOfPoints = 3;
-		x[0] = 0;
-		x[1] = 1;
-		x[2] = 2;
-		y[0] = 0;
-		y[1] = 1;
-		y[2] = 2;
+		x[0] = x_1;
+		x[1] = x_2;
+		x[2] = x_3;
+		y[0] = y_1;
+		y[1] = y_2;
+		y[2] = y_3;
 		printf("\n\n Table entered is as follows :\n\n");
 		for (i = 0; i<quantityOfPoints; i++)
 		{
@@ -444,59 +452,6 @@ double lagrangeInterpolation(){
 	}
 }
 
-double computeAreaRealError(double semiMinorAxis, double semiMayorAxis, double deltaSemiMajorAxis, double deltaSemiMinorAxis){
-
-	double areaError;
-	areaError = M_PI * semiMinorAxis * deltaSemiMajorAxis + M_PI * semiMayorAxis * deltaSemiMinorAxis;
-	return areaError;
-}
-
-void solve_A_2(alg_params params, double specificMomentum,double semiMinorAxis, double semiMayorAxis, double deltaSemiMajorAxis, double deltaSemiMinorAxis){
-
-	double areaReal, areaRealError, period, periodError;
-	double specificAngularMomentumSquaredError = 0.5e-16;
-
-	areaReal = M_PI * semiMinorAxis * semiMayorAxis;
-	areaRealError = computeAreaRealError(semiMinorAxis, semiMayorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
-	period = periodCalculation(areaReal, specificMomentum);
-	periodError = computePeriodError(areaRealError, areaReal, specificMomentum, specificAngularMomentumSquaredError);
-
-	std::fstream statsOutput;
-	statsOutput.open("mustafar_solve_alg2_A_2.csv", std::ios_base::app);
-	statsOutput << params.alg << ";";
-	statsOutput << params.steps << ";";
-	statsOutput << areaReal << ";";
-	statsOutput << areaRealError << ";";
-	statsOutput << period << ";";
-	statsOutput << periodError << ";";
-	statsOutput << computeKeplerThirdLaw(period, semiMayorAxis) << ";";
-	statsOutput << computeKeplerThirdLawError(period,semiMayorAxis,periodError,deltaSemiMajorAxis)<< ";";
-	statsOutput << "\n";
-	statsOutput.close();
-
-}
-
-void solve_A_4(double semiMayorAxis, alg_params params){
-
-	double energy;
-
-	REAL G = 6.673e-11; // N m^2 / kg ^2
-	REAL m1 = params.lambda * (1.9891e+30); // kg
-	REAL m2 = params.lambda * (3.301e+23); // kg
-	REAL M = m1 + m2; // kg
-	REAL mu = G * M; // m^3 / s^2
-
-	energy = ((-1) * mu)  / (2 * semiMayorAxis);
-
-	std::fstream statsOutput;
-	statsOutput.open("mustafar_solve_alg1_A_4.csv", std::ios_base::app);
-	statsOutput << params.alg << ";";
-	statsOutput << params.steps << ";";
-	statsOutput << energy << ";";
-	statsOutput << "\n";
-	statsOutput.close();
-}
-
 void solve_A_1(alg_params params, alg_data data, double specificMomentum)
 {
 	// Cálculo del semi eje mayor como: a =	(radio perihelio + radio afelio) / 2
@@ -513,11 +468,7 @@ void solve_A_1(alg_params params, alg_data data, double specificMomentum)
 	REAL deltaSemiMinorAxis = abs(sqrt((1 - pow(params.epsilon, 2)))) * deltaSemiMajorAxis +
 		abs(semiMajorAxis * pow(2 * sqrt((1 - pow(params.epsilon, 2))), -1) * 2 * params.epsilon) * REAL_EPSILON;
 
-	//solve_A_2(params, specificMomentum, semiMinorAxis, semiMajorAxis, deltaSemiMajorAxis, deltaSemiMinorAxis);
-
-	solve_A_4(semiMajorAxis, params);
-
-	/*
+	
 	std::fstream statsOutput;
 	statsOutput.open("mustafar_solve_A_1.csv", std::ios_base::app);
 	statsOutput << params.alg << ";";
@@ -538,7 +489,7 @@ void solve_A_1(alg_params params, alg_data data, double specificMomentum)
 	REAL max_radius_n = 1 / data.u_n_max;
 	params.pGraph->DrawPointPolar(max_radius_n, max_theta_n, 3, D2D1::ColorF(1, 0, 0, 1));
 	}
-	*/
+	
 }
 
 int main(int argc, char* argv[])
